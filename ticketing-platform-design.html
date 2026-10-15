@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concert ticketing platform — system design</title>
+<style>
+  :root {
+    --bg:        #FAF9F5;
+    --surface:   #FFFFFF;
+    --text:      #141413;
+    --body:      #3D3D3A;
+    --muted:     #87867F;
+    --border:    #D1CFC5;
+    --fill:      #F0EEE6;
+    --clay:      #D97757;
+    --clay-hov:  #C7684C;
+    --olive:     #788C5D;
+    --rust:      #B04A3F;
+    --callout-bg:     rgba(227,218,204,0.35);
+    --callout-border: #E3DACC;
+    --code-bg:   #141413;
+    --code-text: #FAF9F5;
+    --tldr-bg:   #141413;
+    --tldr-text: #FAF9F5;
+    --tldr-muted:#E3DACC;
+    --band:      rgba(20,20,19,0.028);
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+    --r-sm: 8px; --r-md: 12px;
+    --shadow-md: 0 4px 10px rgba(20,20,19,0.08);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615; --surface: #1E1E1C; --text: #EDEBE4; --body: #C8C6BD; --muted: #98968D;
+      --border: #3B3A36; --fill: #262523; --clay: #E08A6D; --clay-hov: #E89C82;
+      --olive: #9BB07E; --rust: #D9776B;
+      --callout-bg: rgba(227,218,204,0.07); --callout-border: #4A463E;
+      --code-bg: #0D0D0C; --code-text: #EDEBE4;
+      --tldr-bg: #262523; --tldr-text: #EDEBE4; --tldr-muted: #B9B4A8;
+      --band: rgba(255,255,255,0.028);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161615; --surface: #1E1E1C; --text: #EDEBE4; --body: #C8C6BD; --muted: #98968D;
+    --border: #3B3A36; --fill: #262523; --clay: #E08A6D; --clay-hov: #E89C82;
+    --olive: #9BB07E; --rust: #D9776B;
+    --callout-bg: rgba(227,218,204,0.07); --callout-border: #4A463E;
+    --code-bg: #0D0D0C; --code-text: #EDEBE4;
+    --tldr-bg: #262523; --tldr-text: #EDEBE4; --tldr-muted: #B9B4A8;
+    --band: rgba(255,255,255,0.028);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 56px 24px 96px;
+  }
+  .sheet { max-width: 1320px; margin: 0 auto; }
+  .prose { max-width: 780px; }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+  h1 { font-size: clamp(30px, 4vw, 40px); line-height: 1.15; letter-spacing: -0.015em; margin-bottom: 14px; }
+  h2 { font-size: 23px; line-height: 1.25; margin-bottom: 10px; }
+  h3 { font-size: 17px; line-height: 1.3; margin: 22px 0 8px; }
+  p { color: var(--body); margin-bottom: 12px; }
+  ul, ol { color: var(--body); padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code { font-family: var(--mono); font-size: 0.88em; background: var(--fill); padding: 1px 5px; border-radius: 4px; }
+  section { margin-top: 56px; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+  .lead { font-size: 16px; max-width: 720px; }
+
+  .btn {
+    height: 34px; padding: 0 14px; font-family: var(--sans); font-size: 13px; font-weight: 500;
+    border-radius: var(--r-sm); border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;
+  }
+  .btn:hover { background: var(--fill); }
+
+  .tldr { background: var(--tldr-bg); color: var(--tldr-text); border-radius: var(--r-md); padding: 24px 32px; margin-top: 32px; }
+  .tldr .eyebrow { color: var(--tldr-muted); }
+  .tldr ol { color: var(--tldr-text); margin: 0; padding-left: 20px; }
+  .tldr li { margin-bottom: 8px; }
+  .tldr li:last-child { margin-bottom: 0; }
+  .tldr strong { color: var(--tldr-text); }
+
+  table {
+    border-collapse: separate; border-spacing: 0; width: 100%;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--r-md); overflow: hidden; font-size: 14px; margin: 14px 0;
+  }
+  thead th {
+    font-family: var(--mono); font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted); background: var(--fill);
+    text-align: left; padding: 12px 16px; white-space: nowrap;
+  }
+  tbody td { padding: 13px 16px; border-bottom: 1px solid var(--fill); vertical-align: top; color: var(--body); }
+  tbody td:first-child { color: var(--text); font-weight: 500; }
+  tbody tr:last-child td { border-bottom: none; }
+  tr.pick td { background: color-mix(in srgb, var(--olive) 9%, transparent); }
+  .table-wrap { overflow-x: auto; }
+  .table-wrap table { min-width: 720px; }
+
+  .callout {
+    display: flex; gap: 12px; border: 1.5px solid var(--callout-border);
+    background: var(--callout-bg); border-radius: 10px; padding: 14px 16px; font-size: 14px; margin: 14px 0;
+  }
+  .callout .ico { color: var(--clay); font-weight: 600; flex-shrink: 0; }
+  .callout p { margin: 0; }
+
+  pre {
+    background: var(--code-bg); color: var(--code-text); font-family: var(--mono);
+    font-size: 12px; line-height: 1.65; border-radius: 10px; padding: 14px 16px;
+    overflow-x: auto; border: 1.5px solid var(--border);
+  }
+  pre .kw { color: var(--clay); }
+  pre .cm { color: var(--muted); }
+
+  details { border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); margin: 14px 0; }
+  summary { list-style: none; cursor: pointer; padding: 14px 16px; font-family: var(--serif); font-size: 16px; font-weight: 500; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸"; color: var(--clay); display: inline-block; margin-right: 8px; transition: transform 120ms; }
+  details[open] summary::before { transform: rotate(90deg); }
+  details .details-body { padding: 4px 16px 16px; border-top: 1px solid var(--fill); }
+  details table { border: none; border-radius: 0; margin: 0; font-size: 13px; }
+
+  /* ── diagram ── */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; margin-top: 20px; }
+  @media (max-width: 1080px) { .layout { grid-template-columns: 1fr; } }
+  .canvas { border: 1.5px solid var(--border); border-radius: 14px; background: var(--surface); padding: 20px; overflow-x: auto; }
+  svg.flow { display: block; width: 100%; height: auto; min-width: 860px; }
+  svg.flow.small { min-width: 760px; }
+
+  .flow text { font-family: var(--mono); font-size: 12px; fill: var(--text); pointer-events: none; }
+  .flow .sub { font-size: 10px; fill: var(--muted); }
+  .flow .lbl { font-size: 10px; fill: var(--muted); }
+  .flow .lbl.clay { fill: var(--clay); }
+  .flow .lbl.rust { fill: var(--rust); }
+  .flow .lbl.olive { fill: var(--olive); }
+  .flow .band { fill: var(--band); stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 4; }
+  .flow .band-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; fill: var(--text); }
+  .flow .chip-t { font-size: 11px; }
+
+  .node rect, .node path.shape { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+  .node path.rim { fill: none; stroke: var(--border); stroke-width: 1.5; }
+  .node.term rect { fill: var(--fill); }
+  .node.ext rect { stroke-dasharray: 5 4; fill: var(--fill); }
+  .node.group > rect { fill: var(--band); }
+  .node.group .chip { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+  .node.hot rect { stroke: var(--clay); fill: color-mix(in srgb, var(--clay) 10%, var(--surface)); }
+  .node.ok rect { stroke: var(--olive); fill: color-mix(in srgb, var(--olive) 13%, var(--surface)); }
+  .node.bad rect { stroke: var(--rust); fill: color-mix(in srgb, var(--rust) 11%, var(--surface)); }
+  .node.click { cursor: pointer; transition: transform 120ms ease; outline: none; }
+  .node.click:hover { transform: translateY(-1px); }
+  .node.click.active > rect, .node.click.active > path.shape, .node.click.active > path.rim { stroke: var(--clay); stroke-width: 2.25; }
+  .node.click:focus-visible > rect, .node.click:focus-visible > path.shape { stroke: var(--clay); stroke-width: 2.25; }
+
+  .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+  .edge.dash { stroke-dasharray: 4 4; }
+  .edge.clay { stroke: var(--clay); stroke-width: 2; marker-end: url(#arrow-clay); }
+  .edge.rust { stroke: var(--rust); stroke-dasharray: 4 4; marker-end: url(#arrow-rust); }
+  .edge.olive { stroke: var(--olive); marker-end: url(#arrow-olive); }
+  .mk-gray { fill: var(--muted); } .mk-clay { fill: var(--clay); } .mk-rust { fill: var(--rust); } .mk-olive { fill: var(--olive); }
+
+  aside.panel {
+    position: sticky; top: 24px; border: 1.5px solid var(--border); border-radius: 14px;
+    background: var(--surface); padding: 20px 20px 22px; max-height: calc(100vh - 48px); overflow-y: auto;
+  }
+  aside .hint { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  aside h3 { font-size: 19px; margin: 0 0 4px; }
+  aside .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+  aside p { font-size: 13.5px; margin-bottom: 10px; }
+  aside h4 { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text); margin: 14px 0 4px; }
+  aside pre { font-size: 11px; margin-top: 12px; white-space: pre-wrap; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; font-size: 12px; color: var(--body); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .swatch { width: 22px; height: 14px; border: 1.5px solid var(--border); border-radius: 4px; background: var(--surface); }
+  .swatch.ext { border-style: dashed; background: var(--fill); }
+  .swatch.hot { border-color: var(--clay); background: color-mix(in srgb, var(--clay) 10%, var(--surface)); }
+  .line { width: 26px; height: 0; border-top: 2px solid var(--muted); }
+  .line.clay { border-color: var(--clay); }
+  .line.dash { border-top-style: dashed; }
+
+  .doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 14px; }
+  .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r-md); padding: 18px 20px; }
+  .card .tag { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--rust); margin-bottom: 6px; }
+  .card h3 { margin: 0 0 6px; }
+  .card p { font-size: 14px; margin: 0; }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="top">
+    <div>
+      <div class="eyebrow">System design proposal · 2026-09-20</div>
+      <h1>Concert ticketing that survives the on-sale</h1>
+      <p class="lead">
+        Two million fans want sixty thousand seats at 10:00:00. The design below does not try to make the
+        purchase path handle two million people. It makes the edge handle them, and lets a bounded,
+        deliberately chosen number through to a core that is small, boring, and strictly consistent.
+      </p>
+    </div>
+    <button class="btn" id="theme-btn" type="button">Switch theme</button>
+  </header>
+
+  <div class="tldr">
+    <div class="eyebrow">The three ideas</div>
+    <ol>
+      <li><strong>The waiting room converts demand into a number we pick.</strong> Everything behind it is sized for the admission rate (~50 shoppers/s steady), not for the crowd (~100k req/s).</li>
+      <li><strong>One arbiter for a seat: a conditional <code style="background:transparent;padding:0">UPDATE</code> in Postgres.</strong> Caches may be stale and workers may crash; none of them can oversell, because none of them decide.</li>
+      <li><strong>A feedback loop closes the system.</strong> When holds slow down, the payment provider browns out, or inventory runs dry, the admission rate drops — to zero if needed — and fans wait in a queue instead of hammering a failing checkout.</li>
+    </ol>
+  </div>
+
+  <section id="numbers">
+    <h2>1 · Problem and numbers</h2>
+    <p class="prose">
+      These are assumptions for one stadium date, chosen to be pessimistic. Every sizing claim later in the
+      document traces back to this table — replace the inputs with real ones and the rest follows.
+    </p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dimension</th><th>Demand zone (edge)</th><th>Admitted zone (core)</th></tr></thead>
+      <tbody>
+        <tr><td>People</td><td>2M sessions for 60k seats; a meaningful share automated</td><td>~12k concurrent shoppers, by choice</td></tr>
+        <tr><td>Request rate</td><td>~100k req/s around T0 — page loads plus queue-status polls, all edge-served</td><td>~3k req/s, mostly cached seat-map reads</td></tr>
+        <tr><td>Contended writes</td><td>None reach origin</td><td>~400 hold attempts/s; 50–100 orders/s</td></tr>
+        <tr><td>Payments</td><td>—</td><td>50–100 TPS typical; provider cap assumed ~300 TPS</td></tr>
+        <tr><td>Latency target</td><td>Queue status &lt; 100 ms</td><td>Hold p99 &lt; 300 ms; seat map p95 &lt; 200 ms</td></tr>
+        <tr><td>Consistency</td><td>Queue order is durable</td><td>Per-seat linearizable; seat map may be ≤ 2 s stale</td></tr>
+        <tr><td>Availability</td><td colspan="2">99.95% on the purchase path during on-sale windows. Browsing and ticket delivery may degrade.</td></tr>
+        <tr><td>Data size</td><td>2M queue entries ≈ 200 MB</td><td>60k seat rows per stadium event; ~25M seat rows + ~10M orders a year ≈ tens of GB</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="prose">
+      The arithmetic behind the admitted column: 60k seats ÷ 2.6 seats per order ≈ 23k orders. With 12k
+      shoppers inside and a ~4 minute session, ~50 leave per second, so ~50 are admitted per second, and the
+      event sells through in roughly 8–15 minutes. The data is tiny; <strong>the problem is contention and
+      burst, not volume.</strong>
+    </p>
+  </section>
+
+  <section id="diagram">
+    <h2>2 · Architecture</h2>
+    <p class="prose">Click any component for its role, what it is sized for, how it fails, and how we would know.</p>
+
+    <div class="layout">
+      <div>
+        <div class="canvas">
+          <svg class="flow" viewBox="0 0 988 810" role="img" aria-label="Architecture diagram of the ticketing platform in three zones: demand, admitted, and async">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-gray" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="arrow-clay" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path class="mk-clay" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="arrow-rust" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-rust" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="arrow-olive" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-olive" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+
+            <!-- zones -->
+            <rect class="band" x="20" y="20" width="948" height="180" rx="12"/>
+            <text class="band-title" x="36" y="46">DEMAND ZONE</text>
+            <text class="sub" x="36" y="61">2M sessions · ~100k req/s</text>
+
+            <rect class="band" x="20" y="220" width="948" height="292" rx="12"/>
+            <text class="band-title" x="36" y="246">ADMITTED ZONE</text>
+            <text class="sub" x="36" y="261">~12k shoppers · ~3k req/s</text>
+
+            <rect class="band" x="20" y="528" width="948" height="262" rx="12"/>
+            <text class="band-title" x="36" y="554">ASYNC ZONE</text>
+            <text class="sub" x="36" y="569">paced by the PSP · ≤300 TPS</text>
+
+            <!-- edges -->
+            <path class="edge" d="M170,114 L230,114"/>
+            <path class="edge" d="M420,102 L520,102"/>
+            <text class="lbl" x="470" y="94" text-anchor="middle">join · poll</text>
+            <path class="edge clay" d="M520,118 L420,118"/>
+            <text class="lbl clay" x="470" y="134" text-anchor="middle">admission token</text>
+            <path class="edge" d="M720,96 L790,96"/>
+
+            <path class="edge" d="M325,142 L325,262"/>
+            <text class="lbl" x="335" y="186">token-bearing requests only</text>
+            <path class="edge" d="M325,314 L325,350"/>
+            <path class="edge" d="M230,300 L180,300"/>
+            <text class="lbl" x="205" y="292" text-anchor="middle">session</text>
+
+            <path class="edge" d="M610,385 L730,385"/>
+            <text class="lbl" x="670" y="377" text-anchor="middle">atomic UPDATE</text>
+            <path class="edge" d="M610,462 L730,462"/>
+            <text class="lbl" x="670" y="454" text-anchor="middle">seat-map reads</text>
+
+            <path class="edge dash" d="M560,350 L560,266 L740,266"/>
+            <text class="lbl" x="568" y="258">load + inventory signals</text>
+            <path class="edge clay" d="M800,240 L800,166 L660,166 L660,122"/>
+            <text class="lbl clay" x="730" y="158" text-anchor="middle">release rate</text>
+
+            <path class="edge dash" d="M930,390 L946,390 L946,592 L930,592"/>
+            <text class="lbl" transform="translate(960,491) rotate(-90)" text-anchor="middle">transactional outbox</text>
+            <path class="edge dash" d="M830,568 L830,496"/>
+            <text class="lbl" x="838" y="538">seat deltas</text>
+            <path class="edge dash" d="M730,592 L660,592"/>
+            <path class="edge dash" d="M470,592 L410,592"/>
+
+            <path class="edge" d="M320,568 L320,470"/>
+            <text class="lbl" x="330" y="548">same codebase · Orders stays the sole writer</text>
+
+            <path class="edge" d="M290,616 L290,698"/>
+            <text class="lbl" x="282" y="652" text-anchor="end">authorize</text>
+            <text class="lbl" x="282" y="664" text-anchor="end">key = order id</text>
+            <path class="edge dash" d="M350,698 L350,616"/>
+            <text class="lbl" x="358" y="652">webhooks</text>
+            <text class="lbl" x="358" y="664">reconcile</text>
+            <path class="edge dash" d="M410,604 L440,604 L440,724 L470,724"/>
+            <text class="lbl" x="448" y="668">tickets</text>
+
+            <!-- demand zone nodes -->
+            <g class="node click term ext" data-k="fans" tabindex="0" role="button" aria-label="Fans">
+              <rect x="40" y="90" width="130" height="48" rx="22"/>
+              <text x="105" y="111" text-anchor="middle">Fans</text>
+              <text class="sub" x="105" y="126" text-anchor="middle">and bots</text>
+            </g>
+            <g class="node click" data-k="edge" tabindex="0" role="button" aria-label="CDN, WAF and bot defence">
+              <rect x="230" y="90" width="190" height="52" rx="8"/>
+              <text x="325" y="112" text-anchor="middle">CDN · WAF · bot defence</text>
+              <text class="sub" x="325" y="128" text-anchor="middle">static pages · seat geometry</text>
+            </g>
+            <g class="node click hot" data-k="wr" tabindex="0" role="button" aria-label="Waiting room">
+              <rect x="520" y="70" width="200" height="52" rx="8"/>
+              <text x="620" y="92" text-anchor="middle">Waiting room</text>
+              <text class="sub" x="620" y="108" text-anchor="middle">random draw at T0 → FIFO</text>
+            </g>
+            <g class="node click" data-k="qs" tabindex="0" role="button" aria-label="Queue state store">
+              <path class="shape" d="M790,78 A70,8 0 0 1 930,78 L930,114 A70,8 0 0 1 790,114 Z"/>
+              <path class="rim" d="M790,78 A70,8 0 0 0 930,78"/>
+              <text x="860" y="102" text-anchor="middle">Queue state</text>
+              <text class="sub" x="860" y="115" text-anchor="middle">durable · ~200 MB</text>
+            </g>
+
+            <!-- admitted zone nodes -->
+            <g class="node click ext" data-k="idp" tabindex="0" role="button" aria-label="Identity provider">
+              <rect x="40" y="280" width="140" height="52" rx="8"/>
+              <text x="110" y="302" text-anchor="middle">Identity (IdP)</text>
+              <text class="sub" x="110" y="318" text-anchor="middle">login before queue</text>
+            </g>
+            <g class="node click" data-k="gw" tabindex="0" role="button" aria-label="API gateway">
+              <rect x="230" y="262" width="190" height="52" rx="8"/>
+              <text x="325" y="284" text-anchor="middle">API gateway</text>
+              <text class="sub" x="325" y="300" text-anchor="middle">verifies token · rate limits</text>
+            </g>
+            <g class="node click hot" data-k="ac" tabindex="0" role="button" aria-label="Admission controller">
+              <rect x="740" y="240" width="190" height="52" rx="8"/>
+              <text x="835" y="262" text-anchor="middle">Admission controller</text>
+              <text class="sub" x="835" y="278" text-anchor="middle">sets release rate every 2 s</text>
+            </g>
+            <g class="node click group" data-k="core" tabindex="0" role="button" aria-label="Ticketing core">
+              <rect x="230" y="350" width="380" height="120" rx="10"/>
+              <text x="246" y="374">Ticketing core · modular monolith · web role</text>
+              <rect class="chip" x="242" y="390" width="82" height="64" rx="8"/>
+              <text class="chip-t" x="283" y="426" text-anchor="middle">Catalog</text>
+              <rect class="chip" x="422" y="390" width="82" height="64" rx="8"/>
+              <text class="chip-t" x="463" y="426" text-anchor="middle">Orders</text>
+              <rect class="chip" x="512" y="390" width="82" height="64" rx="8"/>
+              <text class="chip-t" x="553" y="426" text-anchor="middle">Checkout</text>
+            </g>
+            <g class="node click hot" data-k="inv" tabindex="0" role="button" aria-label="Inventory and holds module">
+              <rect x="332" y="390" width="82" height="64" rx="8"/>
+              <text class="chip-t" x="373" y="419" text-anchor="middle">Inventory</text>
+              <text class="chip-t" x="373" y="434" text-anchor="middle">&amp; holds</text>
+            </g>
+            <g class="node click" data-k="pg" tabindex="0" role="button" aria-label="Postgres">
+              <path class="shape" d="M730,349 A100,9 0 0 1 930,349 L930,415 A100,9 0 0 1 730,415 Z"/>
+              <path class="rim" d="M730,349 A100,9 0 0 0 930,349"/>
+              <text x="830" y="379" text-anchor="middle">Postgres · per-event shard</text>
+              <text class="sub" x="830" y="395" text-anchor="middle">seats · holds · orders · outbox</text>
+              <text class="sub" x="830" y="409" text-anchor="middle">primary + sync replica</text>
+            </g>
+            <g class="node click" data-k="redis" tabindex="0" role="button" aria-label="Availability view in Redis">
+              <path class="shape" d="M730,449 A100,9 0 0 1 930,449 L930,487 A100,9 0 0 1 730,487 Z"/>
+              <path class="rim" d="M730,449 A100,9 0 0 0 930,449"/>
+              <text x="830" y="474" text-anchor="middle">Availability view (Redis)</text>
+              <text class="sub" x="830" y="488" text-anchor="middle">≤2 s stale · rebuildable</text>
+            </g>
+
+            <!-- async zone nodes -->
+            <g class="node click" data-k="worker" tabindex="0" role="button" aria-label="Core worker role">
+              <rect x="230" y="568" width="180" height="48" rx="8"/>
+              <text x="320" y="589" text-anchor="middle">Core · worker role</text>
+              <text class="sub" x="320" y="604" text-anchor="middle">pay · fulfil · reconcile</text>
+            </g>
+            <g class="node click" data-k="mq" tabindex="0" role="button" aria-label="Durable queue">
+              <rect x="470" y="568" width="190" height="48" rx="8"/>
+              <text x="565" y="589" text-anchor="middle">Durable queue</text>
+              <text class="sub" x="565" y="604" text-anchor="middle">payments · fulfilment · DLQ</text>
+            </g>
+            <g class="node click" data-k="relay" tabindex="0" role="button" aria-label="Outbox relay">
+              <rect x="730" y="568" width="200" height="48" rx="8"/>
+              <text x="830" y="589" text-anchor="middle">Outbox relay</text>
+              <text class="sub" x="830" y="604" text-anchor="middle">at-least-once · 2 instances</text>
+            </g>
+            <g class="node click ext" data-k="psp" tabindex="0" role="button" aria-label="Payment provider">
+              <rect x="230" y="698" width="180" height="52" rx="8"/>
+              <text x="320" y="720" text-anchor="middle">Payment provider</text>
+              <text class="sub" x="320" y="736" text-anchor="middle">auth → capture · ~300 TPS</text>
+            </g>
+            <g class="node click ext" data-k="notify" tabindex="0" role="button" aria-label="Email and wallet pass delivery">
+              <rect x="470" y="698" width="190" height="52" rx="8"/>
+              <text x="565" y="720" text-anchor="middle">Email · wallet pass</text>
+              <text class="sub" x="565" y="736" text-anchor="middle">off the critical path</text>
+            </g>
+            <g class="node click" data-k="obs" tabindex="0" role="button" aria-label="Observability and invariant checks">
+              <rect x="730" y="698" width="200" height="52" rx="8"/>
+              <text x="830" y="720" text-anchor="middle">Observability</text>
+              <text class="sub" x="830" y="736" text-anchor="middle">invariant: oversold seats = 0</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="legend">
+          <span><i class="swatch"></i> we run it</span>
+          <span><i class="swatch ext"></i> external / existing platform</span>
+          <span><i class="swatch hot"></i> carries the core idea</span>
+          <span><i class="line"></i> synchronous</span>
+          <span><i class="line dash"></i> async / signals</span>
+          <span><i class="line clay"></i> admission control</span>
+        </div>
+      </div>
+
+      <aside class="panel" id="panel" aria-live="polite">
+        <div class="hint">Click a component in the diagram</div>
+        <h3 id="p-title"></h3>
+        <div class="meta" id="p-meta"></div>
+        <p id="p-body"></p>
+        <h4>When it is slow or down</h4>
+        <p id="p-fail"></p>
+        <h4>How we know it is broken</h4>
+        <p id="p-alarm"></p>
+        <pre id="p-code" hidden></pre>
+      </aside>
+    </div>
+
+    <details>
+      <summary>All component notes as one table</summary>
+      <div class="details-body table-wrap"><table id="all-notes">
+        <thead><tr><th>Component</th><th>Role</th><th>When slow or down</th><th>Alarm</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </details>
+  </section>
+
+  <section id="lifecycle">
+    <h2>3 · Life of a seat</h2>
+    <p class="prose">
+      The no-oversell guarantee lives in this state machine, enforced by Postgres. The one subtle state is
+      <strong>payment unknown</strong>: when the provider times out we do not know whether the card was charged,
+      so the seats stay held until a reconciler finds out. Releasing them on timeout is how platforms end up
+      with charged customers and no tickets.
+    </p>
+    <div class="canvas" style="margin-top:16px">
+      <svg class="flow small" viewBox="0 0 940 236" role="img" aria-label="Seat state machine: available, held, payment in flight, sold, and payment unknown">
+        <path class="edge" d="M150,102 L270,102"/>
+        <text class="lbl" x="210" y="94" text-anchor="middle">POST /holds</text>
+        <path class="edge" d="M390,102 L510,102"/>
+        <text class="lbl" x="450" y="94" text-anchor="middle">POST /orders</text>
+        <path class="edge olive" d="M670,102 L790,102"/>
+        <text class="lbl olive" x="730" y="94" text-anchor="middle">auth ok → capture</text>
+
+        <path class="edge rust" d="M300,80 C300,22 90,22 90,80"/>
+        <text class="lbl rust" x="195" y="28" text-anchor="middle">hold expires · 8 min</text>
+        <path class="edge dash" d="M560,80 C560,44 360,44 360,80"/>
+        <text class="lbl" x="460" y="46" text-anchor="middle">declined → retry</text>
+
+        <path class="edge rust" d="M590,124 L590,170"/>
+        <text class="lbl rust" x="598" y="151">PSP timeout</text>
+        <path class="edge olive" d="M670,192 L850,192 L850,124"/>
+        <text class="lbl olive" x="760" y="184" text-anchor="middle">reconciler finds charge</text>
+        <path class="edge rust" d="M510,192 L90,192 L90,124"/>
+        <text class="lbl rust" x="300" y="184" text-anchor="middle">reconciler finds no charge → void, release</text>
+
+        <g class="node term"><rect x="30" y="80" width="120" height="44" rx="22"/><text x="90" y="106" text-anchor="middle">available</text></g>
+        <g class="node"><rect x="270" y="80" width="120" height="44" rx="8"/><text x="330" y="106" text-anchor="middle">held</text></g>
+        <g class="node"><rect x="510" y="80" width="160" height="44" rx="8"/><text x="590" y="100" text-anchor="middle">payment in flight</text><text class="sub" x="590" y="114" text-anchor="middle">hold pinned</text></g>
+        <g class="node ok term"><rect x="790" y="80" width="120" height="44" rx="22"/><text x="850" y="106" text-anchor="middle">sold</text></g>
+        <g class="node bad"><rect x="510" y="170" width="160" height="44" rx="8"/><text x="590" y="190" text-anchor="middle">payment unknown</text><text class="sub" x="590" y="204" text-anchor="middle">seats stay held</text></g>
+      </svg>
+    </div>
+    <h3>What makes it hold</h3>
+    <ul class="prose">
+      <li><strong>Hold</strong> is one conditional statement over every requested seat. If the row count is short, the transaction rolls back and the shopper gets <code>409 seat_taken</code>. Expiry is lazy — it is part of the predicate, so no timer infrastructure can fail.</li>
+      <li><strong>Confirm</strong> flips order and seats in one transaction, <code>WHERE hold_id = $1</code>. If the hold was lost, the authorisation is voided and never captured. A unique constraint on <code>order_items.seat_id</code> is the backstop.</li>
+      <li><strong>Every mutating call carries an idempotency key</strong>, and the payment provider's key is the order id, so client retries and queue redeliveries cannot double-hold or double-charge.</li>
+    </ul>
+  </section>
+
+  <section id="options">
+    <h2>4 · The decisions that matter</h2>
+
+    <h3>Where seat inventory lives</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Option</th><th>Cost</th><th>Risk</th><th>Rules out later</th></tr></thead>
+      <tbody>
+        <tr class="pick"><td>A · Postgres rows, conditional UPDATE <br><span style="font-weight:400;color:var(--olive)">recommended</span></td><td>Lowest. One store, one source of truth, no reconciliation between stores.</td><td>Write ceiling of one primary per event (~several thousand holds/s). Acceptable only because admission is capped upstream.</td><td>Selling a mega-event with no waiting room.</td></tr>
+        <tr><td>B · Redis holds, Postgres for sold</td><td>Medium. Two stores, TTLs for free, faster holds.</td><td>Async Redis failover can lose holds → two shoppers believe they hold one seat. Postgres must still arbitrate at confirm, so the complexity is added, not moved.</td><td>Nothing — but every hold bug becomes a two-system investigation.</td></tr>
+        <tr><td>C · Per-event in-memory single writer on a log</td><td>Highest. Custom actor, snapshotting, replay, failover protocol.</td><td>We own a bespoke database. Strict arrival-order fairness and 100k+ ops/s in exchange.</td><td>Ordinary SQL tooling for the hottest data.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="prose">
+      <strong>Recommendation: A.</strong> The waiting room makes the write load a number we set, and that number
+      (~400 hold attempts/s, 10× headroom = 4k) sits inside what one Postgres primary does with short
+      single-statement transactions. General-admission tickets are pre-materialised as rows and allocated with
+      <code>FOR UPDATE SKIP LOCKED</code>, so there is no hot counter row.
+      <strong>What would change my mind:</strong> a load test showing hold p99 over 300 ms at 4k attempts/s with
+      30% of attempts aimed at the same 500 seats, or a product requirement to sell without a queue.
+    </p>
+
+    <h3>Waiting room: buy or build</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Option</th><th>Cost</th><th>Risk</th><th>Rules out later</th></tr></thead>
+      <tbody>
+        <tr class="pick"><td>Vendor queue at the CDN, our admission controller <br><span style="font-weight:400;color:var(--olive)">recommended for v1</span></td><td>Per-on-sale fee; days of integration.</td><td>Queue positions are typically cookie-bound, not account-bound, which weakens bot resistance. Must confirm during vendor evaluation that the release rate is API-settable at ~2 s granularity and that pre-T0 randomisation is supported.</td><td>Nothing, if our gateway verifies our own signed token behind one interface.</td></tr>
+        <tr><td>Build on edge workers + durable state</td><td>Weeks, plus owning a 2M-session system that only runs hot a few times a month.</td><td>The least-exercised component is the one facing the most load. Full control over account binding and fairness.</td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="prose">
+      A vendor queue is a new dependency, so this one is yours to approve. Either way the admission controller
+      and the token check stay ours; that is what keeps this a two-way door.
+    </p>
+  </section>
+
+  <section id="doors">
+    <h2>5 · One-way doors</h2>
+    <div class="doors">
+      <div class="card"><div class="tag">⚠ CRITICAL PATH · DB schema</div><h3>Seat-per-row inventory, partitioned by event</h3><p>One row per sellable unit, <code>event_id</code> as partition and shard key. Everything contended hangs off this; changing it under live inventory means a dual-write migration.</p></div>
+      <div class="card"><div class="tag">⚠ CRITICAL PATH · public promise</div><h3>Fairness policy</h3><p>Login required, one position per account, random draw for everyone present at T0, FIFO after, per-account seat limits. Once announced, changing it is a trust and possibly legal matter, not a deploy.</p></div>
+      <div class="card"><div class="tag">⚠ CRITICAL PATH · payments contract</div><h3>Authorise-then-capture, client-side tokenisation</h3><p>Sets PCI scope (card data never reaches us) and makes "void on lost hold" possible. Switching to direct capture later would remove the safety net under the confirm step.</p></div>
+      <div class="card"><div class="tag">⚠ SECURITY · second review</div><h3>Admission token and webhooks</h3><p>Token signing keys, claims (account, event, expiry, <code>kid</code>, version), session binding, and provider webhook signature checks. Versioned, so reversible — but a forged token skips the queue, so it needs a second reviewer.</p></div>
+    </div>
+    <p class="prose" style="margin-top:16px">Two-way doors: the queue vendor, Redis as the availability view (derived data, rebuildable), and the queue technology.</p>
+  </section>
+
+  <section id="not-yet">
+    <h2>6 · Deliberately not handled yet</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Not in this design</th><th>Signal that it is time</th></tr></thead>
+      <tbody>
+        <tr><td>Multi-region active-active inventory</td><td>A data-residency requirement, or a region-outage recovery target under ~15 minutes. Today: multi-AZ sync replica, async cross-region copy, and the provider's records as the external ledger for reconciliation.</td></tr>
+        <tr><td>Multi-CDN</td><td>A CDN incident during an on-sale, or a contractual uptime clause. Today a CDN outage is an outage.</td></tr>
+        <tr><td>Pushed seat-map updates (WebSocket/SSE)</td><td><code>409 seat_taken</code> above ~5% of hold attempts with the 1 s polled view.</td></tr>
+        <tr><td>Resale, transfers, dynamic pricing</td><td>Product roadmap. Transfers would add an owner history to the seat row, which the schema leaves room for.</td></tr>
+        <tr><td>Venue entry scanning</td><td>Separate design — it has to work offline, which is a different problem.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section id="rollout">
+    <h2>7 · Rollout, rollback, verification</h2>
+    <ol class="prose">
+      <li><strong>Prove the arbiter first.</strong> Inventory module alone, 60k seats, 4k hold attempts/s with 30% aimed at the same 500 seats. Pass: zero oversold seats, p99 &lt; 300 ms.</li>
+      <li><strong>Synthetic on-sale at 2× the numbers above,</strong> bot traffic included, against a production-shaped shard. Pass: origin request rate tracks admitted shoppers, not demand.</li>
+      <li><strong>Game days:</strong> kill Redis; 10 s provider brownout; Postgres failover mid-sale; kill the relay. Pass: invariants hold, the controller drops the release rate to zero and recovers with no operator action.</li>
+      <li><strong>Ramp by event size</strong> behind a per-event flag: club shows, then arenas, then a stadium.</li>
+      <li><strong>Rollback</strong> is a per-event kill switch: release rate zero plus a "paused" page, with holds auto-extended while paused. The system is greenfield, so there is no data to migrate back; later schema changes go expand/contract.</li>
+    </ol>
+    <div class="callout">
+      <span class="ico">!</span>
+      <p>None of the throughput figures here are measured. They are sizing assumptions with stated arithmetic; step 1 is what turns the central one — that a single Postgres primary comfortably arbitrates an admission-capped on-sale — into a fact or a reason to revisit option C.</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const HOLD_SQL =
+`UPDATE seats
+   SET status = 'held', hold_id = $1,
+       hold_expires_at = now() + interval '8 minutes'
+ WHERE event_id = $2 AND seat_id = ANY($3)
+   AND (status = 'available'
+        OR (status = 'held' AND hold_expires_at < now()));
+-- row count ≠ seats requested → ROLLBACK, 409 seat_taken`;
+
+const CONTROL =
+`every 2 s:
+  if hold_p99 > 300ms or pay_queue_age > 30s
+     or psp_breaker_open or unheld_seats == 0:
+       rate = 0
+  else rate = clamp(target_active - active, 0, max_rate)
+  if sold_out: tell queue "sold out", drain
+rate command carries a 30 s TTL → decays to 0`;
+
+const DETAIL = {
+  fans: {
+    title: "Fans (and bots)", meta: "external · 2M sessions for 60k seats",
+    body: "Most arrive in the ten minutes before T0 and retry aggressively when anything looks slow. A meaningful share is automated. The design assumption that follows: every client-facing endpoint must be cheap to say “not yet” on.",
+    fail: "Not ours to fail. But client retry storms are the reason nothing in the demand zone touches origin.",
+    alarm: "Arrival curve versus forecast, so the on-sale room knows early if the numbers in section 1 were wrong."
+  },
+  edge: {
+    title: "CDN · WAF · bot defence", meta: "demand zone · ~100k req/s",
+    body: "Serves event pages, scripts, and seat-map geometry (immutable per event, long cache lifetime). The bot layer does device challenges and per-network rate limits. Only requests carrying a valid admission token are forwarded to the gateway; everything else is answered here.",
+    fail: "Slow: fans see a slow queue page; origin is unaffected. Down: we are down — multi-CDN is a stated non-goal.",
+    alarm: "Origin-bound request rate compared with admitted shoppers (a gap means the shield is leaking). Challenge pass rate by network."
+  },
+  wr: {
+    title: "Waiting room", meta: "demand zone · edge-resident · ⚠ SECURITY",
+    body: "Login is required to join, one position per account. Everyone present at T0 is placed by random draw, which removes the incentive to hammer at 09:59:59; later arrivals append in order. Status polls are answered at the edge on an adaptive interval — 5 s near the front, 60 s at the back. At the commanded rate it issues a signed, 15-minute admission token bound to account and event.",
+    fail: "If queue state is unreachable it fails closed: stops issuing tokens and shows “paused”. Positions are durable, so nobody loses their place.",
+    alarm: "Tokens issued per second versus commanded rate. Poll error rate. Duplicate positions per account (should be zero)."
+  },
+  qs: {
+    title: "Queue state", meta: "demand zone · durable · ~200 MB at 2M entries",
+    body: "Position per account plus a head pointer. Small, but it must be durable and consistent: losing or reshuffling the order mid-sale is a fairness incident that ends up in the press.",
+    fail: "Unavailable: the waiting room fails closed. It never guesses positions from a stale copy.",
+    alarm: "Write error rate; head pointer not advancing while release rate > 0."
+  },
+  ac: {
+    title: "Admission controller", meta: "admitted zone · a loop in the worker role, not a new service",
+    body: "The valve. Every 2 s it reads active shoppers, hold latency, payment queue age, provider breaker state and unheld inventory, then commands a release rate. When the event sells out it tells the queue so 1.9M people stop waiting for nothing. Operators have a manual override and a kill switch.",
+    fail: "If the loop dies, its last command expires after 30 s and the waiting room decays to rate zero. Stalling the sale is recoverable; flooding a sick core is not.",
+    alarm: "Controller heartbeat. Time spent at rate zero. Active shoppers versus target.",
+    code: CONTROL
+  },
+  idp: {
+    title: "Identity (IdP)", meta: "existing platform · reused · ⚠ SECURITY",
+    body: "Accounts are created and verified before joining the queue, so the login storm lands in the hour before T0 instead of on top of it. Sessions are signed, so the hot path verifies them locally without calling the IdP.",
+    fail: "Down: no new logins, so no new queue joins. Fans already in the queue or the store are unaffected.",
+    alarm: "Login success rate and latency in the pre-sale hour."
+  },
+  gw: {
+    title: "API gateway", meta: "admitted zone · stateless",
+    body: "Verifies the admission token's signature, expiry and event claim locally — no lookups — and applies a per-token rate limit (~10 req/s) and request timeouts. Rejection is the cheapest code path in the system.",
+    fail: "Stateless and pre-scaled. If it is down, admitted shoppers see errors, the controller sees traffic fall away and stops admitting.",
+    alarm: "401 rate (forgery or leaked tokens), 429 rate (scripted shoppers), p99."
+  },
+  core: {
+    title: "Ticketing core — web role", meta: "admitted zone · one deployable, four modules",
+    body: "A modular monolith. Each module is the only writer of its tables — Catalog: events, maps, prices. Inventory: seats, holds. Orders: orders, items, per-account limits. Checkout: payment intents. Modules call each other's interfaces, never each other's tables. It is pre-scaled before each on-sale, because autoscaling cannot react to a step at T0.",
+    fail: "An instance dying mid-request is safe: a hold either committed or did not, and idempotency keys make the client's retry harmless.",
+    alarm: "Hold success rate, hold p99, 5xx rate, connection pool saturation."
+  },
+  inv: {
+    title: "Inventory & holds", meta: "the one contended resource",
+    body: "One row per sellable seat; general-admission tickets are pre-materialised as rows too, so there is no hot counter. A hold is a single conditional statement. “Best available” selects with FOR UPDATE SKIP LOCKED so shoppers do not queue behind each other's locks. Expiry is lazy — part of the predicate — and a sweeper only refreshes the availability view.",
+    fail: "Contention on a famous seat resolves in one round trip: one UPDATE matches, the rest match zero rows and return 409 immediately.",
+    alarm: "409 seat_taken rate, lock wait time, hold p99.",
+    code: HOLD_SQL
+  },
+  pg: {
+    title: "Postgres — per-event shard", meta: "source of truth · primary + sync replica across AZs",
+    body: "Events are independent, so event_id is the partition and shard key, and a mega on-sale can be pinned to its own cluster. Load is ~400 hold attempts/s and ~100 order transactions/s against 60k rows — far under one primary's ceiling, by design. A connection pooler sits in front. Confirmed orders have zero loss within the region; the cross-region copy is asynchronous.",
+    fail: "Slow: hold p99 breaches, the controller closes the valve. Failover (~30–60 s): holds error, the controller goes to zero, clients retry with the same idempotency keys, the sale resumes.",
+    alarm: "Replication lag, lock waits, p99, pool saturation, failover events."
+  },
+  redis: {
+    title: "Availability view (Redis)", meta: "derived data · ≤2 s stale · 1 s micro-cache in front",
+    body: "A per-event map of seat status, fed by the outbox relay. It is allowed to be wrong: the hold statement is the arbiter, so a stale map costs a “seat just taken” message and never an oversell. Invalidation is the event stream itself, with per-seat version numbers so replays are harmless.",
+    fail: "Cold or gone: rebuilt from a Postgres replica in seconds (60k rows). While rebuilding, the UI switches to an explicit best-available-only mode and says so.",
+    alarm: "View lag (outbox timestamp → applied timestamp) over 2 s. A rising 409 seat_taken rate is the user-visible symptom."
+  },
+  relay: {
+    title: "Outbox relay", meta: "async zone · two instances, advisory-lock leader",
+    body: "Seat and order changes are written to an outbox table in the same transaction as the change itself; the relay tails it and publishes to the availability view and the queue. That removes the dual-write problem: there is no moment where the database says one thing and the queue another. It is on the purchase path, which is why there are two.",
+    fail: "Down: nothing is lost — the outbox accumulates. The view goes stale and payments stop flowing, payment age rises, the controller throttles admission.",
+    alarm: "Age of the oldest unpublished outbox row over 1 s."
+  },
+  mq: {
+    title: "Durable queue", meta: "async zone · at-least-once · dead-letter queue",
+    body: "It exists for one reason: the payment provider is rate-capped and occasionally slow, and a queue lets the worker pool pace itself at the provider's limit instead of holding web requests open. Delivery is at-least-once, so every consumer is idempotent by order id. The shopper's browser polls order status.",
+    fail: "Unavailable: the outbox absorbs the backlog; the payment-age signal throttles admission.",
+    alarm: "Oldest message age. Any message in the dead-letter queue pages someone."
+  },
+  worker: {
+    title: "Ticketing core — worker role", meta: "async zone · same codebase as the web role",
+    body: "Runs payment (authorise → confirm → capture), ticket issuing, the hold sweeper, the provider reconciler, and the admission loop. Because it is the same codebase, Orders remains the sole writer of orders. Confirm is one transaction: order → confirmed, seats → sold WHERE hold_id matches. If the row count is short, the hold was lost — void the authorisation, never capture. Concurrency is capped at the provider's limit.",
+    fail: "Crash mid-payment: the message is redelivered and the provider's idempotency key returns the original result instead of charging twice.",
+    alarm: "Orders in payment_unknown for more than 2 minutes. Voids caused by lost holds (should be zero; non-zero means hold pinning is broken)."
+  },
+  psp: {
+    title: "Payment provider", meta: "external · assumed cap ~300 TPS, negotiated per on-sale",
+    body: "Cards are tokenised in the provider's own form, so card data never reaches us. We authorise, confirm the seats, then capture.",
+    fail: "Slow: 10 s worker timeout → order becomes payment_unknown, seats stay held, the reconciler asks the provider by idempotency key and listens for webhooks. Down: the breaker opens, admission goes to zero, and shoppers already holding seats get their holds extended — an outage that is not their fault should not cost them their seats. Garbage: webhook signatures are verified; unparseable payloads go to the dead-letter queue.",
+    alarm: "Authorisation error rate and p99; breaker state; captured payments without a confirmed order (must be zero)."
+  },
+  notify: {
+    title: "Email · wallet pass", meta: "external · off the critical path",
+    body: "Tickets are issued after confirmation, with signed rotating barcodes. The order page shows “confirmed” immediately, so delivery can lag without anyone doubting their purchase.",
+    fail: "Retries with backoff, then the dead-letter queue. A delay here is an annoyance, not an incident.",
+    alarm: "Confirmed orders with no ticket issued after 10 minutes."
+  },
+  obs: {
+    title: "Observability", meta: "defined before launch, not after",
+    body: "One on-sale dashboard: queue depth, release rate, active shoppers, hold success and p99, view lag, payment age, provider errors. Alongside it an invariant checker runs continuously: seats in more than one confirmed order = 0; sold seats with no confirmed order = 0; captured payments with no confirmed order = 0.",
+    fail: "Any invariant above zero pages immediately and sets the release rate to zero. Selling more slowly is always preferable to selling wrongly.",
+    alarm: "The checker's own heartbeat — a silent checker is indistinguishable from a healthy system."
+  }
+};
+
+const nodes = document.querySelectorAll(".node.click");
+const el = id => document.getElementById(id);
+
+function show(key) {
+  const d = DETAIL[key];
+  if (!d) throw new Error("No detail entry for diagram node: " + key);
+  nodes.forEach(n => n.classList.toggle("active", n.dataset.k === key));
+  el("p-title").textContent = d.title;
+  el("p-meta").textContent = d.meta;
+  el("p-body").textContent = d.body;
+  el("p-fail").textContent = d.fail;
+  el("p-alarm").textContent = d.alarm;
+  el("p-code").hidden = !d.code;
+  el("p-code").textContent = d.code || "";
+}
+
+nodes.forEach(n => {
+  n.addEventListener("click", () => show(n.dataset.k));
+  n.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(n.dataset.k); }
+  });
+});
+show("wr");
+
+const tbody = document.querySelector("#all-notes tbody");
+for (const d of Object.values(DETAIL)) {
+  const tr = document.createElement("tr");
+  for (const v of [d.title, d.body, d.fail, d.alarm]) {
+    const td = document.createElement("td");
+    td.textContent = v;
+    tr.appendChild(td);
+  }
+  tbody.appendChild(tr);
+}
+
+el("theme-btn").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme
+    ? root.dataset.theme === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+});
+</script>
+</body>
+</html>

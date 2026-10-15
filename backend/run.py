@@ -1,0 +1,4 @@
+from ticketsenpai import create_app
+
+if __name__ == '__main__':
+    create_app().run(host='127.0.0.1', port=5001, debug=True, use_debugger=False, use_reloader=False)

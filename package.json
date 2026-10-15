@@ -1,0 +1,15 @@
+{
+  "name": "ticketing-mock-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "In-memory mock backend for the concert ticketing platform design",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/main.js",
+    "web": "node web/serve.js",
+    "test": "node --test"
+  }
+}

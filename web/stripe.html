@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticketing backend demo — Stripe-style skin</title>
+<!-- Same page and scripts as index.html; only the stylesheet differs. -->
+<link rel="stylesheet" href="styles-stripe.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <nav class="skins" aria-label="Skins"><a class="link" href="index.html">Original</a><a class="link" href="ramp.html">Ramp</a><a class="link" href="linear.html">Linear</a><a class="link" href="stripe.html">Stripe</a><a class="link" href="vercel.html">Vercel</a></nav>
+  <button type="button" class="link" id="theme-toggle"></button>
+</div>
+<div id="alerts"></div>
+<main id="app">
+  <noscript><p class="boot">This demo drives the backend from the browser and needs JavaScript.</p></noscript>
+</main>
+</body>
+</html>

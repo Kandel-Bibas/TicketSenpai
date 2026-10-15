@@ -1,0 +1,207 @@
+/* Tokens. Every colour is defined once with light-dark(); the theme toggle only flips color-scheme. */
+:root {
+  color-scheme: light dark;
+
+  --page:        light-dark(#ECEFF2, #0F151C);
+  --surface:     light-dark(#FFFFFF, #17202A);
+  --fill:        light-dark(#E2E7EC, #202C38);
+  --line:        light-dark(#CBD3DB, #2C3A48);
+  --line-strong: light-dark(#97A3B0, #4A5A6B);
+  --ink:         light-dark(#121A24, #E8EDF2);
+  --ink-2:       light-dark(#3D4957, #B7C2CE);
+  --ink-3:       light-dark(#5A6675, #8E9BAA);
+  --bad:         light-dark(#B3261E, #FF8A80);
+  --bad-fill:    light-dark(#FBE9E7, #3A1F1F);
+
+  /* Seat states. The three hues pass the dataviz validator (CVD + normal vision) on both surfaces; sold is a neutral on purpose. */
+  --seat-available: light-dark(#1BAF7A, #199E70);
+  --seat-held:      light-dark(#EDA100, #C98500);
+  --seat-mine:      light-dark(#2A78D6, #3987E5);
+  --seat-sold:      light-dark(#8D99A6, #5B6876);
+
+  --display: "Avenir Next Condensed", "Roboto Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --text:    "Avenir Next", Avenir, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 40px;
+  --radius: 6px;
+  --radius-panel: 10px;
+  --control-h: 36px;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+[hidden] { display: none !important; }
+
+body {
+  background: var(--page);
+  color: var(--ink-2);
+  font: 15px/1.5 var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, strong, dd { color: var(--ink); }
+code { font: 0.87em var(--mono); color: var(--ink); overflow-wrap: anywhere; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+ul, ol { list-style: none; padding: 0; }
+
+/* ── page frame ── */
+.topbar, #app, #alerts { max-width: 1440px; margin-inline: auto; padding-inline: var(--s-5); }
+.topbar { display: flex; justify-content: space-between; gap: var(--s-4); padding-block: var(--s-3); font-size: 13px; color: var(--ink-3); }
+.skins { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+#app { padding-bottom: var(--s-6); }
+.alert { margin-bottom: var(--s-2); padding: var(--s-3) var(--s-4); background: var(--bad-fill); border: 1px solid var(--bad); border-radius: var(--radius); color: var(--ink); }
+.boot { padding-block: var(--s-6); max-width: 60ch; display: grid; gap: var(--s-4); justify-items: start; }
+
+.event { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--s-5); padding-block: var(--s-4) var(--s-5); }
+.event h1, .boot h1 { font: 700 clamp(44px, 7.5vw, 96px)/0.92 var(--display); letter-spacing: -0.02em; }
+.boot h1 { font-size: clamp(32px, 5vw, 56px); }
+.event-meta { margin-top: var(--s-3); font-size: 17px; }
+.event-side { display: grid; gap: var(--s-2); min-width: 220px; }
+.sale-state { font: 700 22px/1.2 var(--display); color: var(--ink); min-height: 1.2em; }
+.tiers li { display: flex; justify-content: space-between; gap: var(--s-5); padding-block: 3px; border-top: 1px solid var(--line); font-size: 14px; }
+
+.layout { display: grid; gap: var(--s-5); grid-template-columns: minmax(0, 1fr); align-items: start; }
+.layout-main, .layout-side { display: grid; gap: var(--s-5); min-width: 0; }
+@media (min-width: 1080px) { .layout { grid-template-columns: minmax(0, 1fr) 372px; } }
+
+/* ── panels: the shopper's side sits on a surface, the operator's side is a bare console column ── */
+.panel { min-width: 0; }
+.layout-main .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); padding: var(--s-5); }
+.layout-side .panel { border-top: 2px solid var(--ink); padding-top: var(--s-3); }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--s-1) var(--s-4); margin-bottom: var(--s-4); }
+.panel-head h2 { font: 700 22px/1.2 var(--display); }
+.hint { font-size: 13px; color: var(--ink-3); }
+.empty { color: var(--ink-3); }
+
+/* ── controls ── */
+.btn, input, select { height: var(--control-h); border-radius: var(--radius); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font: inherit; }
+.btn { padding: 0 14px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.btn:hover:not(:disabled) { background: var(--fill); }
+.btn-primary { background: var(--ink); border-color: var(--ink); color: var(--page); }
+.btn-primary:hover:not(:disabled) { background: var(--ink-2); }
+.btn-quiet { border-color: transparent; background: transparent; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.link { border: 0; padding: 0; background: none; color: var(--ink); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+input, select { padding: 0 10px; min-width: 0; }
+input[type="number"] { width: 88px; }
+input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; padding: 0; accent-color: var(--ink); }
+label, .form-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.row { display: flex; flex-wrap: wrap; align-items: end; gap: var(--s-2); }
+.field { display: grid; gap: var(--s-1); }
+.check { display: flex; align-items: center; gap: var(--s-2); font-weight: 400; color: var(--ink-2); }
+
+/* ── shopper ── */
+.steps { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-5); counter-reset: step; margin-bottom: var(--s-5); border-bottom: 1px solid var(--line); }
+.steps li { counter-increment: step; padding-bottom: var(--s-2); border-bottom: 3px solid transparent; margin-bottom: -1px; color: var(--ink-3); font-size: 14px; }
+.steps li::before { content: counter(step) ". "; font-variant-numeric: tabular-nums; }
+.steps li[data-state="done"]::before { content: "✓ "; }
+.steps li[data-state="done"] { color: var(--ink-2); }
+.steps li[data-state="current"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+
+.shopper-body { display: grid; gap: var(--s-5); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1320px) { .shopper-body { grid-template-columns: minmax(300px, 2fr) minmax(0, 3fr); } }
+.shopper-side { display: grid; gap: var(--s-4); min-width: 0; }
+.action { display: grid; gap: var(--s-3); justify-items: start; min-height: 190px; align-content: start; }
+.action h3 { font: 700 30px/1.1 var(--display); letter-spacing: -0.01em; }
+.action h3:focus { outline: none; }
+.action p { max-width: 58ch; }
+.notice { padding: var(--s-3) var(--s-4); border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--fill); color: var(--ink); }
+.notice.is-error { border-color: var(--bad); background: var(--bad-fill); }
+.notice.is-error::before { content: "Problem: "; font-weight: 700; }
+.best-available { display: grid; gap: var(--s-2); padding-top: var(--s-3); border-top: 1px solid var(--line); width: 100%; }
+
+.cards { border: 0; padding: 0; display: grid; gap: var(--s-2); width: 100%; }
+.cards legend { font-weight: 600; font-size: 13px; color: var(--ink); margin-bottom: var(--s-2); padding: 0; }
+.card-option { display: flex; gap: var(--s-3); align-items: start; padding: var(--s-2) var(--s-3); border: 1px solid var(--line); border-radius: var(--radius); font-weight: 400; cursor: pointer; }
+.card-option:has(input:checked) { border-color: var(--ink); background: var(--fill); }
+.card-option input { margin-top: 3px; flex: none; }
+.card-option strong { margin-right: var(--s-2); font-size: 14px; }
+.card-detail { display: block; font-size: 13px; color: var(--ink-2); }
+
+/* ── venue ── */
+.venue { display: grid; gap: var(--s-4); justify-items: center; min-width: 0; }
+.stage { width: min(100%, 420px); padding: var(--s-2); text-align: center; font: 700 15px var(--display); color: var(--page); background: var(--ink); border-radius: 3px 3px 40px 40px / 3px 3px 14px 14px; }
+.venue-section { width: 100%; display: grid; gap: var(--s-2); justify-items: center; }
+.venue-section-head { display: flex; gap: var(--s-3); align-items: baseline; }
+.venue-section-head h3 { font: 700 16px var(--display); }
+.venue-section-price { font-size: 13px; color: var(--ink-3); }
+.seat-grid { display: grid; grid-template-columns: 1.4em repeat(var(--per-row), minmax(0, 1fr)); gap: 4px; width: min(100%, calc(var(--per-row) * 32px + 1.4em)); align-items: center; }
+.row-label { font-size: 11px; color: var(--ink-3); text-align: right; padding-right: 4px; font-variant-numeric: tabular-nums; }
+.ga-field { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 4px; width: min(100%, 440px); }
+
+.seat { display: block; aspect-ratio: 1; width: 100%; padding: 0; border: 1px solid var(--line-strong); border-radius: 5px 5px 2px 2px; background: transparent; transition: background-color 200ms; }
+.seat-ga { border-radius: 50%; }
+.seat[data-status="available"] { background: var(--seat-available); border-color: transparent; }
+.seat[data-status="held"] { border-color: transparent; background: repeating-linear-gradient(45deg, transparent 0 3px, rgb(0 0 0 / 0.3) 3px 5px) var(--seat-held); }
+.seat[data-status="sold"] { background: var(--seat-sold); border-color: transparent; }
+.seat[data-mine="true"], .seat[aria-pressed="true"] { background: var(--seat-mine); border-color: transparent; }
+.seat[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 1px; }
+.venue[data-interactive="true"] .seat[aria-disabled="false"] { cursor: pointer; }
+.venue[data-interactive="true"] .seat[aria-disabled="false"]:hover { outline: 2px solid var(--ink-3); outline-offset: 1px; }
+button.seat[aria-disabled="true"] { cursor: default; }
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); font-size: 13px; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend .num { color: var(--ink); font-weight: 600; }
+.swatch { width: 14px; flex: none; }
+
+/* ── tickets ── */
+.tickets { display: grid; gap: var(--s-3); width: 100%; }
+.ticket { display: flex; flex-wrap: wrap; border: 1px solid var(--ink); border-radius: var(--radius); background: var(--surface); color: var(--ink); }
+.ticket-main { flex: 1 1 180px; display: grid; gap: 2px; padding: var(--s-3) var(--s-4); }
+.ticket-event { font-size: 13px; color: var(--ink-2); }
+.ticket-seat { font: 700 28px/1 var(--display); }
+.ticket-stub { flex: 0 1 auto; display: grid; gap: var(--s-1); align-content: center; padding: var(--s-3) var(--s-4); border-left: 2px dashed var(--line-strong); max-width: 100%; }
+.barcode { display: block; height: 34px; max-width: 100%; background-repeat: no-repeat; }
+.ticket-stub code { font-size: 11px; }
+
+/* ── control room ── */
+.operator { display: grid; gap: var(--s-4); }
+.operator .panel-head { margin-bottom: 0; }
+.operator h3, .crowd h3 { font-size: 13px; font-weight: 700; margin-bottom: var(--s-2); }
+.valve-rate { font: 700 34px/1 var(--display); color: var(--ink); }
+.valve.is-closed .valve-rate { color: var(--bad); }
+.valve-reason { font-size: 13px; margin-top: var(--s-1); min-height: 3em; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s-4); }
+.stat { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-2); padding-block: 5px; border-top: 1px solid var(--line); font-size: 13px; }
+.stat dd { font-weight: 600; font-size: 14px; }
+.stat.is-bad dd { color: var(--bad); }
+.stat.is-bad dd::after { content: " ⚠"; }
+.bar { display: flex; gap: 2px; height: 14px; margin-bottom: var(--s-2); }
+.bar-seg { min-width: 3px; flex-basis: 0; border-radius: 4px; transition: flex-grow 300ms; }
+.bar-seg[data-status="available"] { background: var(--seat-available); }
+.bar-seg[data-status="held"] { background: repeating-linear-gradient(45deg, transparent 0 3px, rgb(0 0 0 / 0.3) 3px 5px) var(--seat-held); }
+.bar-seg[data-status="sold"] { background: var(--seat-sold); }
+.controls, .rate-form, .crowd-form { display: grid; gap: var(--s-2); }
+.controls { gap: var(--s-3); }
+.control-status { font-size: 13px; min-height: 2.6em; }
+.control-status.is-error { color: var(--bad); }
+.control-status.is-error::before { content: "Problem: "; font-weight: 700; }
+.crowd { display: grid; gap: var(--s-3); }
+.crowd .panel-head { margin-bottom: 0; }
+
+/* ── probes and log ── */
+.probe { display: flex; justify-content: space-between; align-items: start; gap: var(--s-4); padding-block: var(--s-3); border-top: 1px solid var(--line); }
+.probe-title { color: var(--ink); font-weight: 600; }
+.probe-result { font: 13px var(--mono); color: var(--ink); min-height: 1.5em; }
+.table-scroll { overflow-x: auto; }
+.log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.log-table th { text-align: left; font-weight: 600; color: var(--ink-3); padding: var(--s-1) var(--s-3) var(--s-1) 0; border-bottom: 1px solid var(--line-strong); }
+.log-table td { padding: 5px var(--s-3) 5px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.log-table .num { text-align: right; white-space: nowrap; }
+.log-table td:first-child, .log-table th:first-child { text-align: left; }
+.log-table tr.is-error td:nth-child(3), .log-table tr.is-error td:nth-child(4) code { color: var(--bad); }
+.log-source { display: inline-block; min-width: 5.5em; color: var(--ink-3); }
+
+@media (max-width: 600px) {
+  .topbar, #app, #alerts { padding-inline: var(--s-3); }
+  .layout-main .panel { padding: var(--s-4) var(--s-3); }
+  .seat-grid, .ga-field { gap: 3px; }
+  .probe { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seat, .bar-seg { transition: none; }
+}
