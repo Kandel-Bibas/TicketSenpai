@@ -70,8 +70,11 @@ def release_hold(db: sqlite3.Connection, user_id: int, hold_id: str):
     return {'ok': True}
 
 
-def read_order(db: sqlite3.Connection, order_id: int):
-    row = db.execute('SELECT o.*,e.name event_name,e.venue,e.starts_at,u.name buyer_name FROM orders o JOIN events e ON e.id=o.event_id JOIN users u ON u.id=o.user_id WHERE o.id=?', (order_id,)).fetchone()
+def read_order(db: sqlite3.Connection, order_id: int, user_id: int):
+    if not 1 <= order_id <= 9_223_372_036_854_775_807:
+        raise Problem('order_not_found', 'This order does not exist.', 404)
+    # FIXED V03: require the order to belong to the requesting user; an id alone is not enough.
+    row = db.execute('SELECT o.*,e.name event_name,e.venue,e.starts_at,u.name buyer_name FROM orders o JOIN events e ON e.id=o.event_id JOIN users u ON u.id=o.user_id WHERE o.id=? AND o.user_id=?', (order_id, user_id)).fetchone()
     if row is None:
         raise Problem('order_not_found', 'This order does not exist.', 404)
     order = dict(row)
@@ -96,4 +99,4 @@ def checkout(db: sqlite3.Connection, user_id: int, hold_id: str, payment: str, n
         db.executemany('INSERT INTO order_items VALUES(?,?,?,?)', [(order_id, hold['event_id'], s['id'], str(uuid.uuid4())) for s in seats])
         db.execute("UPDATE seats SET status='sold' WHERE hold_id=?", (hold_id,))
         db.execute("UPDATE holds SET status='converted' WHERE id=?", (hold_id,))
-    return read_order(db, order_id)
+    return read_order(db, order_id, user_id)
