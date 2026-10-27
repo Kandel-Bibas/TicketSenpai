@@ -8,6 +8,7 @@ from pathlib import Path
 from functools import wraps
 from flask import Flask, g, jsonify, request
 from werkzeug.exceptions import HTTPException
+from werkzeug.security import generate_password_hash, check_password_hash
 from .db import connect, initialize, transaction, add_seats
 from .service import Problem, event_for, expire_holds, replay, create_hold, release_hold, checkout, read_order
 
@@ -97,8 +98,8 @@ def create_app(database: str | None = None, clock=None):
         with transaction(g.db):
             if g.db.execute('SELECT id FROM users WHERE email=?', (address,)).fetchone():
                 raise Problem('email_taken', 'This email already has an account.', 409)
-            # LAB V05: plaintext storage intentionally replaces password hashing.
-            g.db.execute('INSERT INTO users(email,name,password) VALUES(?,?,?)', (address, name, password))
+            # FIXED V05: store a salted, hashed password, never the plaintext.
+            g.db.execute('INSERT INTO users(email,name,password) VALUES(?,?,?)', (address, name, generate_password_hash(password)))
         return {'ok': True}, 201
 
     @app.post('/api/login')
@@ -106,9 +107,11 @@ def create_app(database: str | None = None, clock=None):
         data = body()
         address, password = email(data), text(data, 'password', 100)
         with transaction(g.db):
-            user = g.db.execute('SELECT id,email,name,role FROM users WHERE email=? AND password=?', (address, password)).fetchone()
-            if user is None:
+            row = g.db.execute('SELECT id,email,name,role,password FROM users WHERE email=?', (address,)).fetchone()
+            # FIXED V05: verify against the stored salted hash instead of comparing plaintext.
+            if row is None or not check_password_hash(row['password'], password):
                 raise Problem('invalid_credentials', 'Email or password is incorrect.', 401)
+            user = {'id': row['id'], 'email': row['email'], 'name': row['name'], 'role': row['role']}
             # LAB V04: predictable user-derived token and no login lockout.
             token = f'session-{user["id"]}'
             g.db.execute('INSERT OR REPLACE INTO sessions VALUES(?,?,?)', (token, user['id'], now() + 86400))
