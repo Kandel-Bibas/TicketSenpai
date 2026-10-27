@@ -141,9 +141,10 @@ def create_app(database: str | None = None, clock=None):
         if len(query) > 300:
             raise Problem('invalid_search', 'Search must be 300 characters or fewer.')
         offset = page()
-        # LAB V01: only this search interpolates untrusted input into SQL.
-        sql = f"SELECT * FROM events WHERE published=1 AND (name LIKE '%{query}%' OR artist LIKE '%{query}%') ORDER BY starts_at LIMIT 20 OFFSET {offset}"
-        return {'items': [dict(row) for row in g.db.execute(sql)]}
+        # FIXED V01: parameterized query; user input is bound as data and can never alter the SQL.
+        pattern = f'%{query}%'
+        sql = "SELECT * FROM events WHERE published=1 AND (name LIKE ? OR artist LIKE ?) ORDER BY starts_at LIMIT 20 OFFSET ?"
+        return {'items': [dict(row) for row in g.db.execute(sql, (pattern, pattern, offset))]}
 
     @app.get('/api/events/<int:event_id>')
     def event(event_id):
