@@ -12,6 +12,9 @@ class Problem(Exception):
 
 
 def event_for(db: sqlite3.Connection, event_id: int):
+    # FIXED V06: reject out-of-range ids before the database so oversized input cannot raise an unhandled error.
+    if not 1 <= event_id <= 9_223_372_036_854_775_807:
+        raise Problem('event_not_found', 'This event does not exist.', 404)
     event = db.execute('SELECT * FROM events WHERE id=? AND published=1', (event_id,)).fetchone()
     if event is None:
         raise Problem('event_not_found', 'This event does not exist.', 404)
