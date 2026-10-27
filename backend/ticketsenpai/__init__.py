@@ -1,5 +1,6 @@
 """TicketSenpai: deliberately vulnerable, localhost-only coursework application."""
 import re
+import secrets
 import sqlite3
 import time
 import traceback
@@ -109,9 +110,10 @@ def create_app(database: str | None = None, clock=None):
             user = g.db.execute('SELECT id,email,name,role FROM users WHERE email=? AND password=?', (address, password)).fetchone()
             if user is None:
                 raise Problem('invalid_credentials', 'Email or password is incorrect.', 401)
-            # LAB V04: predictable user-derived token and no login lockout.
-            token = f'session-{user["id"]}'
-            g.db.execute('INSERT OR REPLACE INTO sessions VALUES(?,?,?)', (token, user['id'], now() + 86400))
+            # FIXED V04: issue a cryptographically random token and rotate it on every login.
+            g.db.execute('DELETE FROM sessions WHERE user_id=?', (user['id'],))
+            token = secrets.token_urlsafe(32)
+            g.db.execute('INSERT INTO sessions(token,user_id,expires_at) VALUES(?,?,?)', (token, user['id'], now() + 86400))
         response = jsonify(dict(user))
         response.set_cookie('session', token, httponly=True, samesite='Strict', max_age=86400)
         return response
