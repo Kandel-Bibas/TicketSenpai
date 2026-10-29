@@ -213,13 +213,13 @@ def create_app(database: str | None = None, clock=None):
     @auth()
     def orders():
         ids = g.db.execute('SELECT id FROM orders WHERE user_id=? ORDER BY id DESC LIMIT 20 OFFSET ?', (g.user['id'], page())).fetchall()
-        return {'items': [read_order(g.db, row['id']) for row in ids]}
+        return {'items': [read_order(g.db, row['id'], g.user['id']) for row in ids]}
 
     @app.get('/api/orders/<int:order_id>')
     @auth()
     def order(order_id):
-        # LAB V03: authentication is required, but ownership is intentionally unchecked.
-        return read_order(g.db, order_id)
+        # FIXED V03: scope the lookup to the signed-in user so one customer cannot read another's order.
+        return read_order(g.db, order_id, g.user['id'])
 
     def event_data(data):
         fields = {k: text(data, k, 2000 if k == 'description' else 200) for k in ('name', 'artist', 'venue', 'starts_at', 'genre', 'description')}
