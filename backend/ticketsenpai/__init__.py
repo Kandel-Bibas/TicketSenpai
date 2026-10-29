@@ -1,5 +1,6 @@
 """TicketSenpai: deliberately vulnerable, localhost-only coursework application."""
 import re
+import secrets
 import sqlite3
 import time
 import traceback
@@ -15,7 +16,7 @@ from .service import Problem, event_for, expire_holds, replay, create_hold, rele
 
 def create_app(database: str | None = None, clock=None):
     app = Flask(__name__)
-    app.config.update(DEBUG=True, MAX_CONTENT_LENGTH=32_768)
+    app.config.update(DEBUG=False, MAX_CONTENT_LENGTH=32_768)
     path = database or str(Path(__file__).parent.parent / 'instance' / 'ticketsenpai.sqlite3')
     initialize(path)
     now = clock or (lambda: int(time.time()))
@@ -41,8 +42,8 @@ def create_app(database: str | None = None, clock=None):
     @app.errorhandler(Exception)
     def unexpected(error):
         app.logger.exception('Unhandled API error')
-        # LAB V06: deliberately expose server traceback; no interactive execution console.
-        return jsonify(error={'code': 'debug_error', 'message': str(error), 'traceback': traceback.format_exc()}), 500
+        # FIXED V06: log details server-side only; return an opaque error to the client.
+        return jsonify(error={'code': 'internal_error', 'message': 'Something went wrong on our end.'}), 500
 
     def auth(admin=False):
         def decorate(fn):
@@ -112,9 +113,10 @@ def create_app(database: str | None = None, clock=None):
             if row is None or not check_password_hash(row['password'], password):
                 raise Problem('invalid_credentials', 'Email or password is incorrect.', 401)
             user = {'id': row['id'], 'email': row['email'], 'name': row['name'], 'role': row['role']}
-            # LAB V04: predictable user-derived token and no login lockout.
-            token = f'session-{user["id"]}'
-            g.db.execute('INSERT OR REPLACE INTO sessions VALUES(?,?,?)', (token, user['id'], now() + 86400))
+            # FIXED V04: issue a cryptographically random token and rotate it on every login.
+            g.db.execute('DELETE FROM sessions WHERE user_id=?', (user['id'],))
+            token = secrets.token_urlsafe(32)
+            g.db.execute('INSERT INTO sessions(token,user_id,expires_at) VALUES(?,?,?)', (token, user['id'], now() + 86400))
         response = jsonify(dict(user))
         response.set_cookie('session', token, httponly=True, samesite='Strict', max_age=86400)
         return response
@@ -144,9 +146,10 @@ def create_app(database: str | None = None, clock=None):
         if len(query) > 300:
             raise Problem('invalid_search', 'Search must be 300 characters or fewer.')
         offset = page()
-        # LAB V01: only this search interpolates untrusted input into SQL.
-        sql = f"SELECT * FROM events WHERE published=1 AND (name LIKE '%{query}%' OR artist LIKE '%{query}%') ORDER BY starts_at LIMIT 20 OFFSET {offset}"
-        return {'items': [dict(row) for row in g.db.execute(sql)]}
+        # FIXED V01: parameterized query; user input is bound as data and can never alter the SQL.
+        pattern = f'%{query}%'
+        sql = "SELECT * FROM events WHERE published=1 AND (name LIKE ? OR artist LIKE ?) ORDER BY starts_at LIMIT 20 OFFSET ?"
+        return {'items': [dict(row) for row in g.db.execute(sql, (pattern, pattern, offset))]}
 
     @app.get('/api/events/<int:event_id>')
     def event(event_id):
@@ -215,13 +218,13 @@ def create_app(database: str | None = None, clock=None):
     @auth()
     def orders():
         ids = g.db.execute('SELECT id FROM orders WHERE user_id=? ORDER BY id DESC LIMIT 20 OFFSET ?', (g.user['id'], page())).fetchall()
-        return {'items': [read_order(g.db, row['id']) for row in ids]}
+        return {'items': [read_order(g.db, row['id'], g.user['id']) for row in ids]}
 
     @app.get('/api/orders/<int:order_id>')
     @auth()
     def order(order_id):
-        # LAB V03: authentication is required, but ownership is intentionally unchecked.
-        return read_order(g.db, order_id)
+        # FIXED V03: scope the lookup to the signed-in user so one customer cannot read another's order.
+        return read_order(g.db, order_id, g.user['id'])
 
     def event_data(data):
         fields = {k: text(data, k, 2000 if k == 'description' else 200) for k in ('name', 'artist', 'venue', 'starts_at', 'genre', 'description')}

@@ -340,8 +340,8 @@ export default function Event({ params }) {
               <strong>{item.name}</strong>
               <span className="muted">{date(item.created_at * 1000)}</span>
             </div>
-            {/* LAB V02: intentionally unsanitized HTML for stored-XSS coursework. */}
-            <div dangerouslySetInnerHTML={{ __html: item.body }} />
+            {/* FIXED V02: render the review as text so React escapes any HTML/JS it contains. */}
+            <div className="review-body">{item.body}</div>
           </article>
         ))}
         {(reviewPage > 1 || reviews.length === 20) && (
