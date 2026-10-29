@@ -2,6 +2,7 @@
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
+from werkzeug.security import generate_password_hash
 
 
 def connect(path: str) -> sqlite3.Connection:
@@ -42,11 +43,11 @@ def initialize(path: str):
         with transaction(db):
             if db.execute('SELECT count(*) FROM users').fetchone()[0]:
                 return
-            # LAB V05: passwords deliberately stored in plaintext.
+            # FIXED V05: seed accounts with salted password hashes, never plaintext.
             db.executemany('INSERT INTO users(email,name,password,role) VALUES(?,?,?,?)', [
-                ('alice@example.test', 'Alice', 'alice-demo', 'customer'),
-                ('bob@example.test', 'Bob', 'bob-demo', 'customer'),
-                ('admin@example.test', 'Senpai', 'admin-demo', 'admin'),
+                ('alice@example.test', 'Alice', generate_password_hash('alice-demo'), 'customer'),
+                ('bob@example.test', 'Bob', generate_password_hash('bob-demo'), 'customer'),
+                ('admin@example.test', 'Senpai', generate_password_hash('admin-demo'), 'admin'),
             ])
             events = [
                 ('After Hours', 'The Midnight Assembly', 'Mock Arena · Chicago', '2027-03-20T20:00:00Z', 'Electronic', 'A late-night meeting of analog synths, deep bass, and a room full of people who know every word.', 9500, 1),
