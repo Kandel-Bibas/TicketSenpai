@@ -15,7 +15,7 @@ from .service import Problem, event_for, expire_holds, replay, create_hold, rele
 
 def create_app(database: str | None = None, clock=None):
     app = Flask(__name__)
-    app.config.update(DEBUG=True, MAX_CONTENT_LENGTH=32_768)
+    app.config.update(DEBUG=False, MAX_CONTENT_LENGTH=32_768)
     path = database or str(Path(__file__).parent.parent / 'instance' / 'ticketsenpai.sqlite3')
     initialize(path)
     now = clock or (lambda: int(time.time()))
@@ -41,8 +41,8 @@ def create_app(database: str | None = None, clock=None):
     @app.errorhandler(Exception)
     def unexpected(error):
         app.logger.exception('Unhandled API error')
-        # LAB V06: deliberately expose server traceback; no interactive execution console.
-        return jsonify(error={'code': 'debug_error', 'message': str(error), 'traceback': traceback.format_exc()}), 500
+        # FIXED V06: log details server-side only; return an opaque error to the client.
+        return jsonify(error={'code': 'internal_error', 'message': 'Something went wrong on our end.'}), 500
 
     def auth(admin=False):
         def decorate(fn):
