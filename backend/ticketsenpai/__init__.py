@@ -169,7 +169,7 @@ def create_app(database: str | None = None, clock=None):
     def review(event_id):
         event_for(g.db, event_id)
         content = text(body(), 'body', 2000)
-        # LAB V02: HTML is persisted unchanged and rendered as HTML by the frontend.
+        # FIXED V02: body is stored verbatim but the frontend renders it as text (escaped), not HTML.
         row_id = g.db.execute('INSERT INTO reviews(event_id,user_id,body,created_at) VALUES(?,?,?,?)', (event_id, g.user['id'], content, now())).lastrowid
         return {'id': row_id}, 201
 
