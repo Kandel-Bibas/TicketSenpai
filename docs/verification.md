@@ -1,5 +1,7 @@
 # Submission verification
 
+> Milestone 1 record. All six weaknesses were fixed in Milestone 3; see [the remediation record](vulnerabilities.md).
+
 Verified October 15, 2026 on the current macOS host. This was a fresh temporary
 checkout on the same computer, not a test on a second physical machine or Linux.
 
