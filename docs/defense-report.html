@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Defense Report - TicketSenpai</title>
+<style>
+  @page { size: Letter; margin: 0.6in 0.7in 0.65in; }
+  @page { @bottom-left { content: "TicketSenpai · Defense Report · Team Sentinel"; font: 8.5pt "Times New Roman", Times, serif; color: #666; } }
+  @page { @bottom-right { content: counter(page); font: 8.5pt "Times New Roman", Times, serif; color: #666; } }
+  @page :first { @bottom-left { content: none; } @bottom-right { content: none; } }
+  :root { --ink: #111; --muted: #555; --rule: #222; --line: #bbb; --code-bg: #f2f2f2; --head-bg: #e4e4e4; --bad: #8a1c1c; --good: #1c5e2c; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; color: var(--ink); background: #fff; font: 10pt/1.3 "Times New Roman", Times, serif; }
+  h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
+  h2 { font-size: 13.5pt; margin: 9pt 0 4pt; padding-bottom: 2pt; border-bottom: 1.2pt solid var(--rule); break-after: avoid; }
+  h3 { font-size: 11pt; margin: 6pt 0 3pt; break-after: avoid; }
+  h4 { font-size: 10.3pt; margin: 6pt 0 2pt; break-after: avoid; }
+  p { margin: 0 0 3.5pt; }
+  ul { margin: 0 0 3.5pt; padding-left: 14pt; }
+  li { margin: 0 0 0.5pt; }
+  code, pre { font-family: Menlo, "Courier New", monospace; }
+  code { font-size: 8.6pt; }
+  pre { margin: 0 0 3pt; padding: 3pt 5pt; font-size: 7.5pt; line-height: 1.3; white-space: pre-wrap; word-break: break-word;
+        background: var(--code-bg); border: 0.75pt solid var(--line); break-inside: avoid; }
+  pre b { font-weight: 700; }
+  pre .tag { display: block; font-weight: 700; font-family: "Times New Roman", Times, serif; font-size: 8.5pt; margin-bottom: 1pt; }
+  pre .tag.bad { color: var(--bad); } pre .tag.good { color: var(--good); }
+  .del { background: #f6dede; } .add { background: #dcefdf; }
+  table { width: 100%; border-collapse: collapse; margin: 2pt 0 4pt; font-size: 9pt; break-inside: avoid; }
+  th, td { border: 0.75pt solid #333; padding: 1.5pt 4pt; text-align: left; vertical-align: top; }
+  th { background: var(--head-bg); }
+  td code { font-size: 8.2pt; }
+  .finding { margin: 0 0 3pt; padding: 2pt 5pt; border: 0.75pt solid var(--line); font-size: 9pt; }
+  .finding span { white-space: nowrap; }
+  .vuln { break-inside: auto; }
+  .vuln > h4 + .finding { break-before: avoid; }
+  .label { font-weight: 700; }
+  figure { margin: 4pt 0 6pt; break-inside: avoid; }
+  figure img { width: 80%; border: 0.75pt solid var(--line); display: block; }
+  figcaption { font-size: 9pt; color: var(--muted); margin-top: 2pt; }
+  .page-break { break-before: page; }
+
+  .cover { height: 9.3in; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover h1 { font-size: 34pt; letter-spacing: 0.5pt; margin-bottom: 8pt; }
+  .cover .sub { font-size: 15pt; font-weight: 700; color: #444; margin-bottom: 3pt; }
+  .cover .app { font-style: italic; font-size: 12pt; margin-bottom: 22pt; }
+  .cover dl { margin: 0 auto 26pt; display: grid; grid-template-columns: auto auto; gap: 3pt 8pt; justify-content: center; text-align: left; font-size: 11pt; }
+  .cover dt { font-weight: 700; text-align: right; }
+  .cover dd { margin: 0; }
+  .toc { width: 4.6in; margin: 0 auto; text-align: left; font-size: 10.5pt; }
+  .toc h2 { font-size: 12pt; border-bottom: 0.75pt solid var(--rule); margin: 0 0 4pt; }
+  .toc ol { margin: 0; padding-left: 16pt; }
+  .toc li { margin: 1pt 0; }
+  .toc ul { list-style: none; padding-left: 10pt; margin: 0; }
+  .todo { background: #ffe58a; }
+
+  @media screen {
+    body { max-width: 8.5in; margin: 24px auto; padding: 0 0.8in; }
+    .cover { height: auto; padding: 1in 0; }
+  }
+  @media screen and (prefers-color-scheme: dark) {
+    :root { --ink: #e8e6e3; --muted: #aaa; --rule: #ccc; --line: #555; --code-bg: #1d1f21; --head-bg: #2a2c2e; --bad: #f08a8a; --good: #8fd19e; }
+    body { background: #121314; }
+    th, td { border-color: #666; }
+    .del { background: #4a2323; } .add { background: #1f3d26; }
+    .cover .sub { color: #bbb; }
+  }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <h1>DEFENSE REPORT</h1>
+  <div class="sub">Vulnerability Remediation</div>
+  <div class="app">TicketSenpai: concert-ticketing application</div>
+  <dl>
+    <dt>Prepared by:</dt><dd>Team Sentinel</dd>
+    <dt>Team members:</dt><dd>Bibas Kandel, Bipul Adhikari, Om Nepal, Sushant Aryal, Suwan Aryal</dd>
+    <dt>Original pentest report by:</dt><dd>The team that tested our application (anonymous)</dd>
+    <dt>Date of remediation:</dt><dd>October 27 – November 1, 2026</dd>
+    <dt>Report date:</dt><dd>November 1, 2026</dd>
+    <dt>Course:</dt><dd>CSC 489: Web Application Security, Capstone Milestone 3</dd>
+  </dl>
+  <nav class="toc">
+    <h2>Table of contents</h2>
+    <ol>
+      <li>Executive summary</li>
+      <li>Vulnerabilities addressed</li>
+      <li>Remediation details
+        <ul>
+          <li>3.1 Critical and high severity fixes</li>
+          <li>3.2 Medium severity fixes</li>
+          <li>3.3 Low severity fixes</li>
+          <li>3.4 Additional hardening</li>
+        </ul>
+      </li>
+      <li>Testing and verification</li>
+      <li>Lessons learned</li>
+    </ol>
+  </nav>
+</section>
+
+<section class="page-break">
+<h2>1. Executive summary</h2>
+<p>This report documents the security remediation of TicketSenpai, Team Sentinel's concert-ticketing application, after the Milestone 2 penetration test. The testers documented five vulnerabilities: three Critical (SQL injection, insecure direct object reference, and a forgeable session token) and two High (stored cross-site scripting and information disclosure through debug mode). We fixed all five and confirmed that each original exploit, replayed with the report's own payload, no longer works. We also fixed plaintext password storage, which the report's impact analysis exposed through the SQL injection finding. (The pentest report's executive summary mentions four vulnerabilities, but its findings section documents five; we addressed all five.)</p>
+
+<table>
+  <tr><th>Severity</th><th>Found</th><th>Fixed</th></tr>
+  <tr><td>Critical</td><td>3</td><td>3 ✓</td></tr>
+  <tr><td>High</td><td>2</td><td>2 ✓</td></tr>
+  <tr><td>Medium</td><td>0</td><td>None reported</td></tr>
+  <tr><td>Low</td><td>0</td><td>None reported</td></tr>
+  <tr><td>Additional hardening (not a reported finding)</td><td>1</td><td>1 ✓</td></tr>
+  <tr><th>Total</th><th>6</th><th>6</th></tr>
+</table>
+
+<p class="label">Key security improvements</p>
+<ul>
+  <li>Parameterized the only SQL query that embedded user input, and range-checked numeric ids before they reach the database.</li>
+  <li>Rendered user reviews as escaped text, enforced order ownership on the server, and replaced predictable session tokens with random ones that rotate on every login.</li>
+  <li>Hashed passwords with salted scrypt, turned debug mode off everywhere the server starts, and stopped returning stack traces to clients.</li>
+</ul>
+<p><span class="label">Current security status.</span> Every vulnerability in the penetration test report has been remediated. The backend test suite now contains a regression test for each one, and the full suite passes (20 backend tests, 65 reference tests) with all features working.</p>
+
+<h2>2. Vulnerabilities addressed</h2>
+<table>
+  <tr><th>#</th><th>Vulnerability</th><th>Pentest finding</th><th>Severity</th><th>Status</th><th>Fixed by</th></tr>
+  <tr><td>1</td><td>SQL injection in event search</td><td>Finding #1</td><td>Critical</td><td>Fixed ✓</td><td>Bibas Kandel</td></tr>
+  <tr><td>2</td><td>Stored XSS in event reviews</td><td>Finding #2</td><td>High</td><td>Fixed ✓</td><td>Bipul Adhikari</td></tr>
+  <tr><td>3</td><td>IDOR on order details</td><td>Finding #3</td><td>Critical</td><td>Fixed ✓</td><td>Om Nepal</td></tr>
+  <tr><td>4</td><td>Forgeable session token</td><td>Finding #4</td><td>Critical</td><td>Fixed ✓</td><td>Sushant Aryal</td></tr>
+  <tr><td>5</td><td>Debug mode and stack-trace disclosure</td><td>Finding #5</td><td>High</td><td>Fixed ✓</td><td>Bibas Kandel</td></tr>
+  <tr><td>6</td><td>Plaintext password storage</td><td>(hardening)</td><td>Hardening</td><td>Fixed ✓</td><td>Suwan Aryal</td></tr>
+</table>
+<p><span class="label">Remediation approach.</span> We worked in severity order from the report: the three Critical findings first, then the two High findings, then the password-storage hardening. Each fix was made on its own git branch and merged through its own pull request (October 27). Each one was tested immediately with the report's payload to confirm that the exploit failed and the feature still worked. Before submission we turned our Milestone 1 tests, which had asserted that the vulnerabilities existed, into regression tests that assert each exploit is blocked. We then re-ran the full suite and replayed every payload against a fresh local instance (November 1).</p>
+</section>
+
+<h2 class="page-break">3. Remediation details</h2>
+<h3>3.1 Critical and high severity fixes</h3>
+
+<div class="vuln">
+<h4>Vulnerability #1: SQL injection in event search (Critical)</h4>
+<div class="finding"><span class="label">Original finding:</span> Pentest Finding #1 · <span>Critical</span> · <span><code>GET /api/events?q=</code></span> · <span><code>backend/ticketsenpai/__init__.py</code>, <code>events()</code></span></div>
+<p><span class="label">The problem.</span> The search built its SQL with an f-string, so the <code>q</code> value became part of the query text. The payload <code>') UNION SELECT … FROM users --</code> closed the string and appended a second query that listed every account's email, role and password.</p>
+<pre><span class="tag bad">BEFORE (vulnerable): __init__.py, lines 145–146</span><span class="del">sql = f"SELECT * FROM events WHERE published=1 AND (name LIKE '%{query}%' OR artist LIKE '%{query}%') ORDER BY starts_at LIMIT 20 OFFSET {offset}"</span>
+return {'items': [dict(row) for row in g.db.execute(sql)]}</pre>
+<pre><span class="tag good">AFTER (secure): __init__.py, lines 149–151</span><span class="add">pattern = f'%{query}%'
+sql = "SELECT * FROM events WHERE published=1 AND (name LIKE ? OR artist LIKE ?) ORDER BY starts_at LIMIT 20 OFFSET ?"</span>
+return {'items': [dict(row) for row in g.db.execute(sql, <b>(pattern, pattern, offset)</b>)]}</pre>
+<p><span class="label">What changed.</span> The query text is constant; the pattern and offset are bound by the SQLite driver, so input is always data and can never change the query. <span class="label">Security control:</span> parameterized query (prepared statement).</p>
+<p><span class="label">Testing verification.</span> The report's UNION payload now returns <code>200 {"items": []}</code>, and so does <code>') OR 1=1 -- </code>; neither leaks rows or the unpublished draft event. A normal search for "After" still returns "After Hours". Regression test: <code>test_v01_search_injection_is_treated_as_text</code>.</p>
+</div>
+
+<div class="vuln">
+<h4>Vulnerability #2: Stored XSS in event reviews (High)</h4>
+<div class="finding"><span class="label">Original finding:</span> Pentest Finding #2 · <span>High</span> · <span><code>POST /api/events/&lt;id&gt;/reviews</code></span>, shown on <span><code>/events/&lt;id&gt;</code></span> · <span><code>frontend/app/events/[id]/page.js</code>, line 344</span></div>
+<p><span class="label">The problem.</span> Reviews were inserted into the page with <code>dangerouslySetInnerHTML</code>, so the browser parsed stored review text as HTML and <code>&lt;img src=x onerror=alert('XSS')&gt;</code> ran for everyone who opened the event.</p>
+<pre><span class="tag bad">BEFORE (vulnerable): page.js, line 344</span><span class="del">&lt;div dangerouslySetInnerHTML={{ __html: item.body }} /&gt;</span></pre>
+<pre><span class="tag good">AFTER (secure): page.js, line 344</span><span class="add">&lt;div className="review-body"&gt;{item.body}&lt;/div&gt;</span></pre>
+<p><span class="label">What changed.</span> The review is rendered as a React text node, so React HTML-encodes it and the browser displays it instead of executing it; no raw-HTML sink remains in the frontend. The backend stores the text as submitted, which is safe because encoding happens at output. <span class="label">Security control:</span> context-aware output encoding (React auto-escaping).</p>
+<p><span class="label">Testing verification.</span> We posted the report's payload and a marker variant (<code>onerror="document.body.dataset.xss='verified'"</code>), then loaded the event page in a real browser. The payload appears as literal text (Figure 1), the page contains no injected <code>&lt;img&gt;</code> element, and the marker was never set. Posting and reading reviews still work.</p>
+</div>
+
+<div class="vuln">
+<h4>Vulnerability #3: Insecure direct object reference on order details (Critical)</h4>
+<div class="finding"><span class="label">Original finding:</span> Pentest Finding #3 · <span>Critical</span> · <span><code>GET /api/orders/&lt;order_id&gt;</code></span> · <span><code>backend/ticketsenpai/service.py</code>, <code>read_order()</code></span>; route <span><code>order()</code> in <code>__init__.py</code></span></div>
+<p><span class="label">The problem.</span> Order details were fetched by id alone and never checked against the requester. Order ids are sequential, so Bob could open <code>/tickets/1</code> and read Alice's name, seat and barcode.</p>
+<pre><span class="tag bad">BEFORE (vulnerable): service.py, line 73; __init__.py, line 221</span>def read_order(db, order_id):
+    row = db.execute('SELECT o.*, … FROM orders o … <span class="del">WHERE o.id=?</span>', (order_id,)).fetchone()
+# route: return read_order(g.db, order_id)</pre>
+<pre><span class="tag good">AFTER (secure): service.py, lines 76–82; __init__.py, line 226</span>def read_order(db, order_id, <b>user_id</b>):
+    row = db.execute('SELECT o.*, … FROM orders o … <span class="add">WHERE o.id=? AND o.user_id=?</span>', (order_id, <b>user_id</b>)).fetchone()
+    if row is None:
+        raise Problem('order_not_found', 'This order does not exist.', 404)
+# route: return read_order(g.db, order_id, <b>g.user['id']</b>)</pre>
+<p><span class="label">What changed.</span> <code>read_order</code> requires the signed-in user's id and filters on it; every caller passes it. Another user's order gets the same 404 as a missing one, so existence is not revealed. <span class="label">Security control:</span> object-level authorization check on the server.</p>
+<p><span class="label">Testing verification.</span> Signed in as Bob, <code>GET /api/orders/1</code> (Alice's order) returns <code>404 order_not_found</code>, and Bob's order list is empty. Alice still gets <code>200</code> for her own order. Regression test: <code>test_v03_order_detail_is_owner_scoped</code>.</p>
+</div>
+
+<div class="vuln">
+<h4>Vulnerability #4: Forgeable session token (Critical)</h4>
+<div class="finding"><span class="label">Original finding:</span> Pentest Finding #4 · <span>Critical</span> · <span><code>session</code> cookie on every authenticated endpoint</span> · <span><code>backend/ticketsenpai/__init__.py</code>, <code>login()</code></span></div>
+<p><span class="label">The problem.</span> Login set the session cookie to the literal string <code>session-&lt;user id&gt;</code>. Setting <code>session=session-3</code> by hand made a visitor the administrator without a password.</p>
+<pre><span class="tag bad">BEFORE (vulnerable): __init__.py, lines 113–114</span><span class="del">token = f'session-{user["id"]}'</span>
+g.db.execute('INSERT OR REPLACE INTO sessions VALUES(?,?,?)', (token, user['id'], now() + 86400))</pre>
+<pre><span class="tag good">AFTER (secure): __init__.py, lines 116–118</span><span class="add">g.db.execute('DELETE FROM sessions WHERE user_id=?', (user['id'],))
+token = secrets.token_urlsafe(32)</span>
+g.db.execute('INSERT INTO sessions(token,user_id,expires_at) VALUES(?,?,?)', (token, user['id'], now() + 86400))</pre>
+<p><span class="label">What changed.</span> Tokens are 256 bits from the cryptographically secure <code>secrets</code> module and cannot be guessed; each login deletes the user's previous sessions, so the token rotates. HttpOnly/SameSite=Strict cookies, 24-hour expiry and logout deletion remain. <span class="label">Security control:</span> cryptographically random session identifiers with rotation on login.</p>
+<p><span class="label">Testing verification.</span> <code>Cookie: session=session-3</code> on <code>/api/admin/events</code> now returns <code>401 unauthenticated</code>, and <code>session-1</code> and <code>session-2</code> return 401 on <code>/api/me</code>. A real login issues a 43-character random token, and the previous token stops working after the next login. Regression test: <code>test_v04_session_tokens_are_random_and_rotate</code>.</p>
+</div>
+
+<div class="vuln">
+<h4>Vulnerability #5: Debug mode and stack-trace disclosure (High)</h4>
+<div class="finding"><span class="label">Original finding:</span> Pentest Finding #5 · <span>High</span> · <span><code>GET /api/events/99999999999999999999999999999</code></span> · <span><code>__init__.py</code>, config and <code>unexpected()</code>;</span> <span><code>service.py</code>, <code>event_for()</code>;</span> <span><code>backend/run.py</code></span></div>
+<p><span class="label">The problem.</span> Debug mode was on, and the catch-all error handler returned <code>traceback.format_exc()</code>. An unauthenticated request with a 29-digit event id crashed SQLite binding, and the 500 response exposed source paths, the OS username, line numbers and query structure.</p>
+<pre><span class="tag bad">BEFORE (vulnerable): __init__.py, lines 17 and 44; run.py, line 4</span>app.config.update(<span class="del">DEBUG=True</span>, MAX_CONTENT_LENGTH=32_768)
+return jsonify(error={'code': 'debug_error', 'message': str(error), <span class="del">'traceback': traceback.format_exc()</span>}), 500
+create_app().run(host='127.0.0.1', port=5001, <span class="del">debug=True</span>, use_debugger=False, use_reloader=False)</pre>
+<pre><span class="tag good">AFTER (secure): __init__.py, lines 18 and 43–45; service.py, lines 16–17; run.py, line 4</span>app.config.update(<span class="add">DEBUG=False</span>, MAX_CONTENT_LENGTH=32_768)
+app.logger.exception('Unhandled API error')   # full detail stays in the server log
+return jsonify(error={'code': 'internal_error', 'message': <span class="add">'Something went wrong on our end.'</span>}), 500
+create_app().run(host='127.0.0.1', port=5001, <span class="add">debug=False</span>, use_debugger=False, use_reloader=False)
+<span class="add">if not 1 &lt;= event_id &lt;= 9_223_372_036_854_775_807:
+    raise Problem('event_not_found', 'This event does not exist.', 404)</span></pre>
+<p><span class="label">What changed.</span> Debug mode is off in the app config and in the entry point <code>make dev</code> runs. Clients get a generic 500 body while details are logged server-side, and ids outside SQLite's integer range get a 404 before reaching the database. <span class="label">Security control:</span> secure error handling, safe configuration, and input range validation.</p>
+<p><span class="label">Testing verification.</span> The 29-digit request now returns <code>404 event_not_found</code> with no traceback. A deliberately raised server error returns only <code>{"error": {"code": "internal_error", "message": "Something went wrong on our end."}}</code>, and the server prints "Debug mode: off" at startup. Regression test: <code>test_v06_errors_do_not_disclose_internals</code>.</p>
+</div>
+
+<h3>3.2 Medium severity fixes</h3>
+<p>The penetration test reported no Medium severity findings.</p>
+<h3>3.3 Low severity fixes</h3>
+<p>The penetration test reported no Low severity findings.</p>
+
+<h3>3.4 Additional hardening</h3>
+<div class="vuln">
+<h4>Vulnerability #6: Plaintext password storage</h4>
+<div class="finding"><span class="label">Issue:</span> Not a separate finding, but Finding #1 showed its impact: the SQL injection displayed every plaintext password. · <span><code>__init__.py</code>, <code>register()</code> and <code>login()</code>;</span> <span><code>db.py</code>, seed data</span></div>
+<p><span class="label">Fix applied.</span> Passwords are stored as salted scrypt hashes (werkzeug) and verified by hash comparison, so the plaintext is never written to the database.</p>
+<pre><span class="tag bad">BEFORE (vulnerable): __init__.py, lines 101 and 109</span>INSERT INTO users(email,name,password) VALUES(?,?,?)', (address, name, <span class="del">password</span>)
+SELECT id,email,name,role FROM users WHERE email=? <span class="del">AND password=?</span>', (address, password)</pre>
+<pre><span class="tag good">AFTER (secure): __init__.py, lines 102 and 110–113; db.py, lines 47–51</span>INSERT INTO users(email,name,password) VALUES(?,?,?)', (address, name, <span class="add">generate_password_hash(password)</span>)
+row = …SELECT id,email,name,role,password FROM users WHERE email=?', (address,)
+if row is None or not <span class="add">check_password_hash(row['password'], password)</span>: raise Problem('invalid_credentials', …, 401)</pre>
+<p><span class="label">Testing.</span> Every stored password now begins <code>scrypt:32768:8:1$…</code>, and none matches a demo password. The demo logins still work and a wrong password returns 401. Regression test: <code>test_v05_passwords_are_stored_hashed</code>. A database created by the Milestone 1 build must be reset once with <code>make reset CONFIRM=reset</code>, as noted in the README.</p>
+</div>
+<p><span class="label">Dependency update.</span> The pentest report noted an install-time dependency advisory that "needs separate review." It was a critical published advisory affecting Next.js 16.4.0. We upgraded to the patched release, 16.4.3 (<code>frontend/package.json</code> and lockfile). <code>npm audit</code> now reports 0 vulnerabilities, and the first <code>make dev</code> no longer stops with a security notice.</p>
+
+<h2>4. Testing and verification</h2>
+<p><span class="label">Methodology.</span> For each finding we replayed the exact payload and steps from the penetration test report against a fresh local instance (<code>make setup</code>, <code>make dev</code>). We confirmed that (1) the exploit no longer works, (2) the response is appropriate and reveals nothing, and (3) the feature still works with legitimate input. The XSS fix was checked in a real browser.</p>
+<table>
+  <tr><th>Vulnerability</th><th>Original exploit (from the pentest report)</th><th>Before the fix</th><th>Result after the fix</th></tr>
+  <tr><td>SQL injection</td><td><code>') UNION SELECT … FROM users --</code></td><td>All accounts and passwords listed</td><td><code>{"items": []}</code>, nothing leaked ✓</td></tr>
+  <tr><td>Stored XSS</td><td><code>&lt;img src=x onerror=alert('XSS')&gt;</code></td><td>Script ran for every viewer</td><td>Shown as plain text ✓</td></tr>
+  <tr><td>IDOR</td><td>Bob opens <code>/api/orders/1</code></td><td>Alice's order and barcode shown</td><td><code>404 order_not_found</code> ✓</td></tr>
+  <tr><td>Session forgery</td><td><code>Cookie: session=session-3</code></td><td>Admin dashboard, no password</td><td><code>401 unauthenticated</code> ✓</td></tr>
+  <tr><td>Info disclosure</td><td>29-digit event id</td><td>500 with full traceback</td><td><code>404</code>, no traceback ✓</td></tr>
+  <tr><td>Plaintext passwords</td><td>Read the <code>users</code> table</td><td><code>alice-demo</code> readable</td><td>Only scrypt hashes ✓</td></tr>
+</table>
+
+<figure>
+  <img src="screenshots/xss_rendered_as_text.png" alt="Event page reviews section showing the img onerror payload as literal text under Alice's name">
+  <figcaption>Figure 1. The stored XSS payload on <code>/events/1</code> after the fix. It shows as literal text, no image element is created, and the script does not run.</figcaption>
+</figure>
+
+<p><span class="label">Automated regression tests.</span> Our Milestone 1 test suite contained tests that asserted the six vulnerabilities existed. We converted them into regression tests (<code>test_v01</code> to <code>test_v06</code> in <code>backend/tests/test_app.py</code>) that assert each exploit is blocked. Run against the original Milestone 1 code, the five backend regression tests fail, as they should. The sixth, V02, is a frontend fix and was verified in the browser as described above. On the fixed code, <code>make test</code> passes all 20 backend tests and all 65 reference tests.</p>
+<p><span class="label">Functionality testing.</span> The 14 feature tests and our manual run confirm that registration, login, logout and profile edits; event search; seat holds (including concurrency, expiry and idempotent replays); simulated checkout with decline and retry; reading one's own orders; posting and displaying reviews; and administrator event management (with 403 for customers) all still work. No feature was broken by the security changes.</p>
+
+<h2>5. Lessons learned</h2>
+<p><span class="label">Technical lessons.</span></p>
+<ul>
+  <li><b>Each destination needs its own defense.</b> Data goes into SQL only through bound parameters and into HTML only through encoding. It decides whose data is returned only after an explicit ownership check.</li>
+  <li><b>Security values must be random, and secrets must be hashed.</b> A token derived from a user id is effectively a password everyone knows.</li>
+  <li><b>Configuration has more than one source.</b> We set <code>DEBUG=False</code> in the app config, but the dev-server entry point still started Flask with <code>debug=True</code>. A fix is only complete once every place the setting is applied has been checked.</li>
+</ul>
+<p><span class="label">Process lessons.</span> Fixing one vulnerability per branch and testing each immediately with the report's own payload made every change small and easy to review. Our old tests encoded the vulnerabilities as expected behavior. Inverting them turned the pentest report into a permanent regression suite, so a fix can't quietly be undone.</p>
+<p><span class="label">Future improvements.</span> Write parameterized queries and ownership checks from the first line of a feature. Keep debug output out of anything but local development. Run a security linter and static analysis during development. Review the OWASP Top 10 before building rather than after. Add login throttling, which is still missing and is our next hardening item.</p>
+<p><span class="label">Best practices adopted.</span> Parameterized queries for all SQL; output encoding for all user content and no raw HTML sinks; server-side authorization on every user-specific endpoint; random, rotating, expiring session tokens; salted adaptive password hashing; generic client errors with server-side logging; validation of input ranges at the edge; and a regression test for every fixed vulnerability.</p>
+
+<p><span class="label">Conclusion.</span> All vulnerabilities identified in the penetration test have been remediated and verified with the testers' own payloads and with automated regression tests, and the application's functionality remains intact.</p>
+</body>
+</html>

@@ -1,9 +1,8 @@
-"""TicketSenpai: deliberately vulnerable, localhost-only coursework application."""
+"""TicketSenpai: localhost-only coursework application, remediated in Milestone 3."""
 import re
 import secrets
 import sqlite3
 import time
-import traceback
 from datetime import datetime
 from pathlib import Path
 from functools import wraps

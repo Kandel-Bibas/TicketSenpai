@@ -4,9 +4,9 @@ import subprocess
 import tempfile
 import zipfile
 
-ROOT = Path(__file__).resolve().parent.parent
-ARCHIVE = ROOT / 'output/TicketSenpai_Milestone1.zip'
-PREFIX = 'TicketSenpai_Milestone1'
+from package_submission import OUT as ARCHIVE, PREFIX as ARCHIVE_PREFIX
+
+PREFIX = ARCHIVE_PREFIX.rstrip('/')
 
 with tempfile.TemporaryDirectory(prefix='ticketsenpai-submission-') as directory:
     with zipfile.ZipFile(ARCHIVE) as archive:

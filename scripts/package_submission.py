@@ -4,8 +4,9 @@ import hashlib
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'output/TicketSenpai_Milestone1.zip'
-PREFIX = 'TicketSenpai_Milestone1/'
+OUT = ROOT / 'output/Sentinel_Milestone3.zip'
+PREFIX = 'Sentinel_Milestone3/'
+REPORT = 'Defense_Report.pdf'
 FILES = ['README.md', 'Makefile', '.gitignore', '.gitattributes', 'package.json',
          'ticketing-platform-design.html', 'waiting-room-explainer.html']
 TREES = ['backend', 'frontend', 'scripts', 'docs', 'src', 'test', 'web']
@@ -17,11 +18,9 @@ def include(path):
                 or path.suffix in {'.pyc', '.pyo', '.db', '.sqlite3', '.log'})
 
 def main():
-    pdf = ROOT / 'output/pdf/PROJECT_SUMMARY.pdf'
+    pdf = ROOT / REPORT
     if not pdf.is_file():
-        pdf = ROOT / 'PROJECT_SUMMARY.pdf'
-    if not pdf.is_file():
-        raise SystemExit('Missing PROJECT_SUMMARY.pdf. Run scripts/build_summary.py with ReportLab first.')
+        raise SystemExit(f'Missing {REPORT}. Run scripts/build_defense_report.py first.')
     entries = {name: ROOT / name for name in FILES}
     for tree in TREES:
         for path in (ROOT / tree).rglob('*'):
@@ -30,7 +29,7 @@ def main():
                 if path.is_symlink():
                     raise SystemExit(f'Refusing source symlink: {rel}')
                 entries[rel.as_posix()] = path
-    entries['PROJECT_SUMMARY.pdf'] = pdf
+    entries[REPORT] = pdf
     for name, path in entries.items():
         if not path.is_file():
             raise SystemExit(f'Missing required source: {name}')

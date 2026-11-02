@@ -1,4 +1,4 @@
-"""Public HTTP tests for purchase correctness and the six intentional weaknesses."""
+"""Public HTTP tests for purchase correctness and regressions for the six remediated weaknesses."""
 import concurrent.futures
 import sqlite3
 import tempfile
@@ -27,6 +27,9 @@ class TicketSenpaiTest(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         return client
 
+    def token(self, client=None):
+        return (client or self.client).get_cookie('session').value
+
     def hold(self, seats=None, client=None, key=None, event=1):
         return (client or self.client).post(f'/api/events/{event}/holds', json={'seat_ids': seats or ['A-1-1']}, headers={'Idempotency-Key': key or str(uuid.uuid4())})
 
@@ -40,7 +43,7 @@ class TicketSenpaiTest(unittest.TestCase):
         self.assertEqual(order['total_cents'], 18500)
         self.assertEqual(order['tickets'][0]['seat_id'], 'A-1-1')
         restarted = create_app(self.path, clock=lambda: self.time).test_client()
-        restarted.set_cookie('session', 'session-1')
+        restarted.set_cookie('session', self.token())
         self.assertEqual(restarted.get('/api/orders').get_json()['items'][0]['id'], order['id'])
         seats = restarted.get('/api/events/1').get_json()['seats']
         self.assertEqual(next(s for s in seats if s['id'] == 'A-1-1')['status'], 'sold')
@@ -66,7 +69,7 @@ class TicketSenpaiTest(unittest.TestCase):
     def test_concurrent_checkout_replays_one_order(self):
         hold = self.hold().get_json()
         other = self.app.test_client()
-        other.set_cookie('session', 'session-1')
+        other.set_cookie('session', self.token())
         with concurrent.futures.ThreadPoolExecutor(2) as pool:
             results = list(pool.map(lambda c: self.buy(hold, client=c, key='same-order-key').get_json(), [self.client, other]))
         self.assertEqual(results[0]['id'], results[1]['id'])
@@ -100,7 +103,7 @@ class TicketSenpaiTest(unittest.TestCase):
     def test_active_hold_restores_after_restart_and_is_owner_filtered(self):
         hold = self.hold().get_json()
         restarted = create_app(self.path, clock=lambda: self.time).test_client()
-        restarted.set_cookie('session', 'session-1')
+        restarted.set_cookie('session', self.token())
         self.assertEqual(restarted.get('/api/events/1/hold').get_json()['hold'], hold)
         self.assertIsNone(self.login('bob').get('/api/events/1/hold').get_json()['hold'])
         self.time += 480
@@ -158,45 +161,64 @@ class TicketSenpaiTest(unittest.TestCase):
         self.assertEqual(self.client.get(f'/api/events/{event_id}').status_code, 404)
         self.assertEqual(self.buy(hold).status_code, 404)
 
-    def test_v01_sqli_exposes_unpublished_event(self):
+    def test_v01_search_injection_is_treated_as_text(self):
         baseline = self.client.get('/api/events').get_json()['items']
         self.assertEqual(len(baseline), 3)
-        result = self.client.get('/api/events', query_string={'q': "') OR 1=1 -- "})
-        self.assertEqual(result.status_code, 200)
-        self.assertTrue(any(event['published'] == 0 for event in result.get_json()['items']))
+        for payload in ["') OR 1=1 -- ", "') UNION SELECT id, email, password, role, '2027-01-01T00:00:00Z', 'HACKED', name, 9900, 1 FROM users --"]:
+            result = self.client.get('/api/events', query_string={'q': payload})
+            self.assertEqual(result.status_code, 200)
+            self.assertEqual(result.get_json()['items'], [])
+        found = self.client.get('/api/events', query_string={'q': 'After'}).get_json()['items']
+        self.assertEqual([event['name'] for event in found], ['After Hours'])
 
-    def test_v02_stored_html_reaches_other_user(self):
+    def test_v02_review_html_is_returned_as_data(self):
         payload = '<img src=x onerror="document.body.dataset.xss=\'verified\'">'
         self.assertEqual(self.client.post('/api/events/1/reviews', json={'body': payload}).status_code, 201)
         bob = self.login('bob')
         self.assertEqual(bob.get('/api/events/1/reviews').get_json()['items'][0]['body'], payload)
 
-    def test_v03_idor_while_list_is_owner_filtered(self):
+    def test_v03_order_detail_is_owner_scoped(self):
         order = self.buy(self.hold().get_json()).get_json()
         bob = self.login('bob')
         self.assertEqual(bob.get('/api/orders').get_json()['items'], [])
         stolen = bob.get(f'/api/orders/{order["id"]}')
-        self.assertEqual(stolen.status_code, 200)
-        self.assertEqual(stolen.get_json()['buyer_name'], 'Alice')
+        self.assertEqual(stolen.status_code, 404)
+        self.assertEqual(stolen.get_json()['error']['code'], 'order_not_found')
+        self.assertEqual(self.client.get(f'/api/orders/{order["id"]}').get_json()['buyer_name'], 'Alice')
 
-    def test_v04_predictable_session_impersonates_active_user(self):
-        self.login('bob')
-        attacker = self.app.test_client()
-        attacker.set_cookie('session', 'session-2')
-        self.assertEqual(attacker.get('/api/me').get_json()['email'], 'bob@example.test')
+    def test_v04_session_tokens_are_random_and_rotate(self):
+        bob = self.login('bob')
+        for forged in ('session-1', 'session-2', 'session-3'):
+            attacker = self.app.test_client()
+            attacker.set_cookie('session', forged)
+            self.assertEqual(attacker.get('/api/me').status_code, 401)
+        old = self.token(bob)
+        self.assertGreaterEqual(len(old), 43)
+        again = self.login('bob')
+        self.assertNotEqual(self.token(again), old)
+        self.assertEqual(bob.get('/api/me').status_code, 401)
+        self.assertEqual(again.get('/api/me').get_json()['email'], 'bob@example.test')
 
-    def test_v05_plaintext_password_storage(self):
+    def test_v05_passwords_are_stored_hashed(self):
         with closing(sqlite3.connect(self.path)) as db:
-            password = db.execute("SELECT password FROM users WHERE email='alice@example.test'").fetchone()[0]
-        self.assertEqual(password, 'alice-demo')
+            passwords = [row[0] for row in db.execute('SELECT password FROM users')]
+        self.assertEqual(len(passwords), 3)
+        for password in passwords:
+            self.assertTrue(password.startswith('scrypt:'), password)
+            self.assertNotIn('-demo', password)
+        self.assertEqual(self.app.test_client().post('/api/login', json={'email': 'alice@example.test', 'password': 'wrong'}).status_code, 401)
 
-    def test_v06_traceback_disclosure(self):
-        result = self.client.get('/api/events', query_string={'q': "'broken"})
-        self.assertEqual(result.status_code, 500)
-        error = result.get_json()['error']
-        self.assertEqual(error['code'], 'debug_error')
-        self.assertIn('Traceback', error['traceback'])
-        self.assertIn('sqlite3.OperationalError', error['traceback'])
+    def test_v06_errors_do_not_disclose_internals(self):
+        oversized = self.app.test_client().get('/api/events/99999999999999999999999999999')
+        self.assertEqual(oversized.status_code, 404)
+        self.assertEqual(oversized.get_json(), {'error': {'code': 'event_not_found', 'message': 'This event does not exist.'}})
+        app = create_app(self.path, clock=lambda: self.time)
+        app.logger.disabled = True
+        app.add_url_rule('/api/test-crash', 'test_crash', lambda: 1 / 0)
+        crashed = app.test_client().get('/api/test-crash')
+        self.assertEqual(crashed.status_code, 500)
+        self.assertEqual(crashed.get_json(), {'error': {'code': 'internal_error', 'message': 'Something went wrong on our end.'}})
+        self.assertFalse(app.debug)
 
 
 if __name__ == '__main__':
