@@ -1,5 +1,7 @@
 # Submission verification
 
+[Documentation index](README.md) · [Architecture](architecture.md) · [API reference](api.md) · [Security policy](../SECURITY.md)
+
 > Milestone 1 record. All six weaknesses were fixed in Milestone 3; see [the remediation record](vulnerabilities.md).
 
 Verified October 15, 2026 on the current macOS host. This was a fresh temporary

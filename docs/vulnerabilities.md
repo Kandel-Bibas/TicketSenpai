@@ -1,5 +1,7 @@
 # TicketSenpai remediation record
 
+[Documentation index](README.md) · [Architecture](architecture.md) · [API reference](api.md) · [Security policy](../SECURITY.md)
+
 Milestone 1 shipped six intentional weaknesses for peer testing. Milestone 2 testers
 reported five of them (all except V05); all six are fixed in Milestone 3. This record lists each weakness, the
 fix, and a command that confirms the original exploit is now blocked. Run the commands

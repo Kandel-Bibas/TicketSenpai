@@ -1,5 +1,7 @@
 # Ticketing mock backend
 
+[Documentation index](README.md) · [Architecture](architecture.md) · [API reference](api.md) · [Security policy](../SECURITY.md)
+
 In-memory mock of the purchase path described in `ticketing-platform-design.html` — queue,
 admission, holds, orders, payment, and fulfilment. All state lives in process memory and is
 lost on restart. Node >= 22, zero dependencies.

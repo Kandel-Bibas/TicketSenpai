@@ -1,5 +1,7 @@
 # Course-material alignment
 
+[Documentation index](README.md) · [Architecture](architecture.md) · [API reference](api.md) · [Security policy](../SECURITY.md)
+
 > Milestone 1 record. All six weaknesses were fixed in Milestone 3; see [the remediation record](vulnerabilities.md).
 
 Review date: October 15, 2026. This is an evidence checklist, not an assertion of
