@@ -146,8 +146,10 @@ def create_app(database: str | None = None, clock=None):
             raise Problem('invalid_search', 'Search must be 300 characters or fewer.')
         offset = page()
         # FIXED V01: parameterized query; user input is bound as data and can never alter the SQL.
-        pattern = f'%{query}%'
-        sql = "SELECT * FROM events WHERE published=1 AND (name LIKE ? OR artist LIKE ?) ORDER BY starts_at LIMIT 20 OFFSET ?"
+        # Escape LIKE wildcards so '%' and '_' in a search match themselves literally.
+        escaped = query.replace('!', '!!').replace('%', '!%').replace('_', '!_')
+        pattern = f'%{escaped}%'
+        sql = "SELECT * FROM events WHERE published=1 AND (name LIKE ? ESCAPE '!' OR artist LIKE ? ESCAPE '!') ORDER BY starts_at LIMIT 20 OFFSET ?"
         return {'items': [dict(row) for row in g.db.execute(sql, (pattern, pattern, offset))]}
 
     @app.get('/api/events/<int:event_id>')
