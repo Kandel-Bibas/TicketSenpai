@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anyone Can Cook</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <a class="brand" href="#/feed">Anyone Can Cook</a>
+      <nav class="nav" aria-label="Main">
+        <a href="#/feed" data-nav="feed">Feed</a>
+        <a href="#/recipes" data-nav="recipes">Recipes</a>
+      </nav>
+      <form class="search" id="search-form" role="search">
+        <input type="search" id="search-input" placeholder="Search recipes, posts, cooks" aria-label="Search">
+      </form>
+      <div class="who" id="who"></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <main id="view" aria-live="polite"></main>
+    <aside id="side"></aside>
+  </div>
+
+  <dialog id="auth-dialog">
+    <form method="dialog" class="dlg" id="auth-form">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-mode="login" class="on">Log in</button>
+        <button type="button" role="tab" data-mode="register">Create account</button>
+      </div>
+      <label>Username <input name="username" required maxlength="300" autocomplete="username"></label>
+      <label data-only="register">Email <input name="email" type="email" maxlength="120" autocomplete="email"></label>
+      <label>Password <input name="password" type="password" required minlength="1" autocomplete="current-password"></label>
+      <p class="form-error" id="auth-error" role="alert"></p>
+      <div class="dlg-actions">
+        <button type="button" class="ghost" data-action="close-dialog">Cancel</button>
+        <button type="submit" class="primary" id="auth-submit">Log in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="edit-dialog">
+    <form method="dialog" class="dlg" id="edit-form">
+      <label id="edit-label">Edit <textarea name="content" rows="6" maxlength="5000" required></textarea></label>
+      <p class="form-error" id="edit-error" role="alert"></p>
+      <div class="dlg-actions">
+        <button type="button" class="ghost" data-action="close-dialog">Cancel</button>
+        <button type="submit" class="primary">Save changes</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

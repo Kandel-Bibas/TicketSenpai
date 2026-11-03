@@ -1,0 +1,12 @@
+frontend/node_modules/
+frontend/.next/
+backend/.venv/
+backend/instance/
+__pycache__/
+*.pyc
+artifacts/
+output/
+tmp/
+.env
+.env.*
+.DS_Store

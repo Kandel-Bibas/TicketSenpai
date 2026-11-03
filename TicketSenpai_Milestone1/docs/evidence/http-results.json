@@ -1,0 +1,1188 @@
+{
+  "captured_at_utc": "2026-10-19T04:28:03.035131+00:00",
+  "scope": "http://127.0.0.1:3000",
+  "database": "fresh disposable synthetic database",
+  "browser_xss": "HTTP persistence verified; execution requires the separate browser record.",
+  "records": [
+    {
+      "id": "R01-discovery-page",
+      "request": {
+        "method": "GET",
+        "path": "/events",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "Cache-Control": "no-store",
+          "X-Powered-By": "Next.js",
+          "Content-Type": "text/html; charset=utf-8",
+          "Date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "Connection": "close",
+          "Transfer-Encoding": "chunked"
+        },
+        "body": {
+          "html_response_bytes": 12619,
+          "contains_ticket_senpai": true
+        }
+      }
+    },
+    {
+      "id": "R02-api-health",
+      "request": {
+        "method": "GET",
+        "path": "/api/health",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "43",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "name": "TicketSenpai",
+          "ok": true
+        }
+      }
+    },
+    {
+      "id": "V01-baseline",
+      "request": {
+        "method": "GET",
+        "path": "/api/events",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "1131",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "items": [
+            {
+              "artist": "The Midnight Assembly",
+              "description": "A late-night meeting of analog synths, deep bass, and a room full of people who know every word.",
+              "genre": "Electronic",
+              "id": 1,
+              "name": "After Hours",
+              "price_cents": 9500,
+              "published": 1,
+              "starts_at": "2027-03-20T20:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "Paper Satellites",
+              "description": "Big guitars. Small moments. One unforgettable night with your next favorite band.",
+              "genre": "Indie rock",
+              "id": 2,
+              "name": "Loud & Clear",
+              "price_cents": 6500,
+              "published": 1,
+              "starts_at": "2027-04-09T19:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "Yuki & The Blue Notes",
+              "description": "An intimate evening of new jazz, familiar melodies, and a little improvisation.",
+              "genre": "Jazz",
+              "id": 3,
+              "name": "Sunday Sessions",
+              "price_cents": 4500,
+              "published": 1,
+              "starts_at": "2027-05-16T18:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "V01-exploit",
+      "request": {
+        "method": "GET",
+        "path": "/api/events?q=%27%29+OR+1%3D1+--+",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "1474",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "items": [
+            {
+              "artist": "The Midnight Assembly",
+              "description": "A late-night meeting of analog synths, deep bass, and a room full of people who know every word.",
+              "genre": "Electronic",
+              "id": 1,
+              "name": "After Hours",
+              "price_cents": 9500,
+              "published": 1,
+              "starts_at": "2027-03-20T20:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "Paper Satellites",
+              "description": "Big guitars. Small moments. One unforgettable night with your next favorite band.",
+              "genre": "Indie rock",
+              "id": 2,
+              "name": "Loud & Clear",
+              "price_cents": 6500,
+              "published": 1,
+              "starts_at": "2027-04-09T19:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "Yuki & The Blue Notes",
+              "description": "An intimate evening of new jazz, familiar melodies, and a little improvisation.",
+              "genre": "Jazz",
+              "id": 3,
+              "name": "Sunday Sessions",
+              "price_cents": 4500,
+              "published": 1,
+              "starts_at": "2027-05-16T18:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "Secret Artist",
+              "description": "Unpublished event used for the search-injection demonstration.",
+              "genre": "Preview",
+              "id": 4,
+              "name": "Unannounced show",
+              "price_cents": 5500,
+              "published": 0,
+              "starts_at": "2027-06-01T20:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "V01-draft-detail-control",
+      "request": {
+        "method": "GET",
+        "path": "/api/events/4",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "96",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "event_not_found",
+            "message": "This event does not exist."
+          }
+        }
+      }
+    },
+    {
+      "id": "V06-traceback",
+      "request": {
+        "method": "GET",
+        "path": "/api/events?q=%27broken",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "945",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "debug_error",
+            "message": "near \"broken\": syntax error",
+            "traceback": "Traceback (most recent call last):\n  File \"<PROJECT_ROOT>/backend/.venv/lib/python3.14/site-packages/flask/app.py\", line 917, in full_dispatch_request\n    rv = self.dispatch_request()\n  File \"<PROJECT_ROOT>/backend/.venv/lib/python3.14/site-packages/flask/app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"<PROJECT_ROOT>/backend/ticketsenpai/__init__.py\", line 146, in events\n    return {'items': [dict(row) for row in g.db.execute(sql)]}\n                                           ~~~~~~~~~~~~^^^^^\nsqlite3.OperationalError: near \"broken\": syntax error\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "R03-service-survives-error",
+      "request": {
+        "method": "GET",
+        "path": "/api/health",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "43",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "name": "TicketSenpai",
+          "ok": true
+        }
+      }
+    },
+    {
+      "id": "V05-http-credential-disclosure",
+      "request": {
+        "method": "GET",
+        "path": "/api/events?q=%27%29+UNION+SELECT+id%2Cemail%2Cpassword%2C%27lab%27%2C%272027-01-01%27%2C%27lab%27%2C%27lab%27%2C1%2C1+FROM+users+--+",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "1859",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "items": [
+            {
+              "artist": "The Midnight Assembly",
+              "description": "A late-night meeting of analog synths, deep bass, and a room full of people who know every word.",
+              "genre": "Electronic",
+              "id": 1,
+              "name": "After Hours",
+              "price_cents": 9500,
+              "published": 1,
+              "starts_at": "2027-03-20T20:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "alice-demo",
+              "description": "lab",
+              "genre": "lab",
+              "id": 1,
+              "name": "alice@example.test",
+              "price_cents": 1,
+              "published": 1,
+              "starts_at": "2027-01-01",
+              "venue": "lab"
+            },
+            {
+              "artist": "Paper Satellites",
+              "description": "Big guitars. Small moments. One unforgettable night with your next favorite band.",
+              "genre": "Indie rock",
+              "id": 2,
+              "name": "Loud & Clear",
+              "price_cents": 6500,
+              "published": 1,
+              "starts_at": "2027-04-09T19:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "bob-demo",
+              "description": "lab",
+              "genre": "lab",
+              "id": 2,
+              "name": "bob@example.test",
+              "price_cents": 1,
+              "published": 1,
+              "starts_at": "2027-01-01",
+              "venue": "lab"
+            },
+            {
+              "artist": "Yuki & The Blue Notes",
+              "description": "An intimate evening of new jazz, familiar melodies, and a little improvisation.",
+              "genre": "Jazz",
+              "id": 3,
+              "name": "Sunday Sessions",
+              "price_cents": 4500,
+              "published": 1,
+              "starts_at": "2027-05-16T18:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "admin-demo",
+              "description": "lab",
+              "genre": "lab",
+              "id": 3,
+              "name": "admin@example.test",
+              "price_cents": 1,
+              "published": 1,
+              "starts_at": "2027-01-01",
+              "venue": "lab"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "C01-admin-unauthenticated",
+      "request": {
+        "method": "GET",
+        "path": "/api/admin/events",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "97",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "unauthenticated",
+            "message": "Please sign in to continue."
+          }
+        }
+      }
+    },
+    {
+      "id": "A01-login-alice",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "alice@example.test",
+          "password": "alice-demo"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "88",
+          "set-cookie": "session=session-1; Expires=Tue, 20 Oct 2026 04:28:02 GMT; Max-Age=86400; HttpOnly; Path=/; SameSite=Strict",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "email": "alice@example.test",
+          "id": 1,
+          "name": "Alice",
+          "role": "customer"
+        }
+      }
+    },
+    {
+      "id": "A01-login-bob",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "password": "bob-demo"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "84",
+          "set-cookie": "session=session-2; Expires=Tue, 20 Oct 2026 04:28:02 GMT; Max-Age=86400; HttpOnly; Path=/; SameSite=Strict",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "id": 2,
+          "name": "Bob",
+          "role": "customer"
+        }
+      }
+    },
+    {
+      "id": "C02-admin-customer",
+      "request": {
+        "method": "GET",
+        "path": "/api/admin/events",
+        "headers": {
+          "Cookie": "session=session-2"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "97",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "forbidden",
+            "message": "Administrator access is required."
+          }
+        }
+      }
+    },
+    {
+      "id": "V04-guessed-cookie",
+      "request": {
+        "method": "GET",
+        "path": "/api/me",
+        "headers": {
+          "Cookie": "session=session-2"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "84",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "id": 2,
+          "name": "Bob",
+          "role": "customer"
+        }
+      }
+    },
+    {
+      "id": "B01-hold",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/1/holds",
+        "headers": {
+          "Idempotency-Key": "evidence-hold",
+          "Cookie": "session=session-1",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "seat_ids": [
+            "A-1-1"
+          ]
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "153",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "event_id": 1,
+          "expires_at": 1792384562,
+          "id": "2934394b-b7a5-44cb-b6fd-0f6512b4f14c",
+          "seat_ids": [
+            "A-1-1"
+          ],
+          "total_cents": 18500
+        }
+      }
+    },
+    {
+      "id": "B02-checkout",
+      "request": {
+        "method": "POST",
+        "path": "/api/orders",
+        "headers": {
+          "Idempotency-Key": "evidence-buy",
+          "Cookie": "session=session-1",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "hold_id": "2934394b-b7a5-44cb-b6fd-0f6512b4f14c",
+          "payment": "approve"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "426",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "buyer_name": "Alice",
+          "created_at": 1792384082,
+          "event_id": 1,
+          "event_name": "After Hours",
+          "hold_id": "2934394b-b7a5-44cb-b6fd-0f6512b4f14c",
+          "id": 1,
+          "starts_at": "2027-03-20T20:00:00Z",
+          "status": "confirmed",
+          "tickets": [
+            {
+              "barcode": "d5b389d8-1248-4fe2-8879-7d506c65e6f8",
+              "seat_id": "A-1-1"
+            }
+          ],
+          "total_cents": 18500,
+          "user_id": 1,
+          "venue": "Mock Arena \u00b7 Chicago"
+        }
+      }
+    },
+    {
+      "id": "V03-bob-list-control",
+      "request": {
+        "method": "GET",
+        "path": "/api/orders",
+        "headers": {
+          "Cookie": "session=session-2"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "18",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "items": []
+        }
+      }
+    },
+    {
+      "id": "V03-bob-reads-alice",
+      "request": {
+        "method": "GET",
+        "path": "/api/orders/1",
+        "headers": {
+          "Cookie": "session=session-2"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "426",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "buyer_name": "Alice",
+          "created_at": 1792384082,
+          "event_id": 1,
+          "event_name": "After Hours",
+          "hold_id": "2934394b-b7a5-44cb-b6fd-0f6512b4f14c",
+          "id": 1,
+          "starts_at": "2027-03-20T20:00:00Z",
+          "status": "confirmed",
+          "tickets": [
+            {
+              "barcode": "d5b389d8-1248-4fe2-8879-7d506c65e6f8",
+              "seat_id": "A-1-1"
+            }
+          ],
+          "total_cents": 18500,
+          "user_id": 1,
+          "venue": "Mock Arena \u00b7 Chicago"
+        }
+      }
+    },
+    {
+      "id": "V02-store-as-alice",
+      "request": {
+        "method": "POST",
+        "path": "/api/events/1/reviews",
+        "headers": {
+          "Cookie": "session=session-1",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "body": "<img src=x onerror=\"document.body.dataset.xss='verified'\">"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "14",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "id": 2
+        }
+      }
+    },
+    {
+      "id": "V02-read-as-bob",
+      "request": {
+        "method": "GET",
+        "path": "/api/events/1/reviews",
+        "headers": {
+          "Cookie": "session=session-2"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "338",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "items": [
+            {
+              "body": "<img src=x onerror=\"document.body.dataset.xss='verified'\">",
+              "created_at": 1792384082,
+              "id": 2,
+              "name": "Alice"
+            },
+            {
+              "body": "Been waiting all year for this lineup. See you on the floor!",
+              "created_at": 1791849600,
+              "id": 1,
+              "name": "Bob"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "C03-logout",
+      "request": {
+        "method": "POST",
+        "path": "/api/logout",
+        "headers": {
+          "Cookie": "session=session-2"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "17",
+          "set-cookie": "session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "id": "C04-revoked-cookie",
+      "request": {
+        "method": "GET",
+        "path": "/api/me",
+        "headers": {
+          "Cookie": "session=session-2"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "97",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "unauthenticated",
+            "message": "Please sign in to continue."
+          }
+        }
+      }
+    },
+    {
+      "id": "C05-unsupported-method",
+      "request": {
+        "method": "DELETE",
+        "path": "/api/events",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 405,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "121",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "method_not_allowed",
+            "message": "The method is not allowed for the requested URL."
+          }
+        }
+      }
+    },
+    {
+      "id": "C06-options",
+      "request": {
+        "method": "OPTIONS",
+        "path": "/api/events",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "text/html; charset=utf-8",
+          "allow": "GET, OPTIONS, HEAD",
+          "content-length": "0",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "html_response_bytes": 0,
+          "contains_ticket_senpai": false
+        }
+      }
+    },
+    {
+      "id": "C07-trace",
+      "request": {
+        "method": "TRACE",
+        "path": "/api/events",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 405,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "121",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "method_not_allowed",
+            "message": "The method is not allowed for the requested URL."
+          }
+        }
+      }
+    },
+    {
+      "id": "C08-cross-origin",
+      "request": {
+        "method": "GET",
+        "path": "/api/events",
+        "headers": {
+          "Origin": "https://untrusted.example"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "content-type": "application/json",
+          "content-length": "1131",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "items": [
+            {
+              "artist": "The Midnight Assembly",
+              "description": "A late-night meeting of analog synths, deep bass, and a room full of people who know every word.",
+              "genre": "Electronic",
+              "id": 1,
+              "name": "After Hours",
+              "price_cents": 9500,
+              "published": 1,
+              "starts_at": "2027-03-20T20:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "Paper Satellites",
+              "description": "Big guitars. Small moments. One unforgettable night with your next favorite band.",
+              "genre": "Indie rock",
+              "id": 2,
+              "name": "Loud & Clear",
+              "price_cents": 6500,
+              "published": 1,
+              "starts_at": "2027-04-09T19:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            },
+            {
+              "artist": "Yuki & The Blue Notes",
+              "description": "An intimate evening of new jazz, familiar melodies, and a little improvisation.",
+              "genre": "Jazz",
+              "id": 3,
+              "name": "Sunday Sessions",
+              "price_cents": 4500,
+              "published": 1,
+              "starts_at": "2027-05-16T18:00:00Z",
+              "venue": "Mock Arena \u00b7 Chicago"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "C09-file-/.env",
+      "request": {
+        "method": "GET",
+        "path": "/.env",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Cache-Control": "no-store",
+          "Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "X-Powered-By": "Next.js",
+          "Content-Type": "text/html; charset=utf-8",
+          "Date": "Mon, 19 Oct 2026 04:28:02 GMT",
+          "Connection": "close",
+          "Transfer-Encoding": "chunked"
+        },
+        "body": {
+          "html_response_bytes": 12360,
+          "contains_ticket_senpai": true
+        }
+      }
+    },
+    {
+      "id": "C09-file-/.git/config",
+      "request": {
+        "method": "GET",
+        "path": "/.git/config",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Cache-Control": "no-store",
+          "Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "X-Powered-By": "Next.js",
+          "Content-Type": "text/html; charset=utf-8",
+          "Date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "Connection": "close",
+          "Transfer-Encoding": "chunked"
+        },
+        "body": {
+          "html_response_bytes": 12371,
+          "contains_ticket_senpai": true
+        }
+      }
+    },
+    {
+      "id": "C09-file-/backend/instance/ticketsenpai.sqlite3",
+      "request": {
+        "method": "GET",
+        "path": "/backend/instance/ticketsenpai.sqlite3",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Cache-Control": "no-store",
+          "Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+          "X-Powered-By": "Next.js",
+          "Content-Type": "text/html; charset=utf-8",
+          "Date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "Connection": "close",
+          "Transfer-Encoding": "chunked"
+        },
+        "body": {
+          "html_response_bytes": 12401,
+          "contains_ticket_senpai": true
+        }
+      }
+    },
+    {
+      "id": "C09-file-/api/console",
+      "request": {
+        "method": "GET",
+        "path": "/api/console",
+        "headers": {},
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "content-type": "application/json",
+          "content-length": "184",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "not_found",
+            "message": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
+          }
+        }
+      }
+    },
+    {
+      "id": "A02-bad-password-1",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "password": "wrong-password"
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "content-type": "application/json",
+          "content-length": "105",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "invalid_credentials",
+            "message": "Email or password is incorrect."
+          }
+        }
+      }
+    },
+    {
+      "id": "A02-bad-password-2",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "password": "wrong-password"
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "content-type": "application/json",
+          "content-length": "105",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "invalid_credentials",
+            "message": "Email or password is incorrect."
+          }
+        }
+      }
+    },
+    {
+      "id": "A02-bad-password-3",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "password": "wrong-password"
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "content-type": "application/json",
+          "content-length": "105",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "invalid_credentials",
+            "message": "Email or password is incorrect."
+          }
+        }
+      }
+    },
+    {
+      "id": "A02-bad-password-4",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "password": "wrong-password"
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "content-type": "application/json",
+          "content-length": "105",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "invalid_credentials",
+            "message": "Email or password is incorrect."
+          }
+        }
+      }
+    },
+    {
+      "id": "A02-bad-password-5",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "password": "wrong-password"
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "content-type": "application/json",
+          "content-length": "105",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "error": {
+            "code": "invalid_credentials",
+            "message": "Email or password is incorrect."
+          }
+        }
+      }
+    },
+    {
+      "id": "A03-valid-after-failures",
+      "request": {
+        "method": "POST",
+        "path": "/api/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "password": "bob-demo"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "server": "Werkzeug/3.1.9 Python/3.14.7",
+          "date": "Mon, 19 Oct 2026 04:28:03 GMT",
+          "content-type": "application/json",
+          "content-length": "84",
+          "set-cookie": "session=session-2; Expires=Tue, 20 Oct 2026 04:28:03 GMT; Max-Age=86400; HttpOnly; Path=/; SameSite=Strict",
+          "connection": "close",
+          "Vary": "Accept-Encoding"
+        },
+        "body": {
+          "email": "bob@example.test",
+          "id": 2,
+          "name": "Bob",
+          "role": "customer"
+        }
+      }
+    }
+  ]
+}
