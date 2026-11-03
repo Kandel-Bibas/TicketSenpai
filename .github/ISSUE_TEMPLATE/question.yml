@@ -1,0 +1,21 @@
+name: Question
+description: Ask how something works or how to do something.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check [SUPPORT.md](https://github.com/Kandel-Bibas/TicketSenpai/blob/main/SUPPORT.md) and the [documentation index](https://github.com/Kandel-Bibas/TicketSenpai/blob/main/docs/README.md) first.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What have you tried?
+      description: Commands you ran and their output.
+      render: text

@@ -1,5 +1,7 @@
 # TicketSenpai team plan
 
+[Documentation index](README.md) · [Architecture](architecture.md) · [API reference](api.md) · [Security policy](../SECURITY.md)
+
 > Milestone 1 record. All six weaknesses were fixed in Milestone 3; see [the remediation record](vulnerabilities.md).
 
 Team name: **Team TicketSenpai**. All member names below are generic placeholders.

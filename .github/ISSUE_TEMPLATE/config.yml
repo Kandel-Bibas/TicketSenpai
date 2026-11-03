@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Kandel-Bibas/TicketSenpai/security/advisories/new
+    about: Please report security issues privately. Never open a public issue for them.
+  - name: Troubleshooting and FAQ
+    url: https://github.com/Kandel-Bibas/TicketSenpai/blob/main/docs/troubleshooting.md
+    about: Most setup and runtime problems are answered here.
