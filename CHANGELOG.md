@@ -16,6 +16,21 @@ is named after the milestone it shipped in.
   [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md),
   [SECURITY.md](SECURITY.md), [SUPPORT.md](SUPPORT.md), and GitHub issue and
   pull request templates.
+- Further guides: [user guide](docs/user-guide.md), [administrator guide](docs/admin-guide.md),
+  [database reference](docs/database.md), [frontend guide](docs/frontend.md),
+  [testing guide](docs/testing.md), [configuration reference](docs/configuration.md),
+  [glossary](docs/glossary.md), and [threat model](docs/threat-model.md).
+
+### Fixed
+
+- Event search treats `%` and `_` as literal characters instead of LIKE
+  wildcards, so searching for `%` no longer returns every event. ([#10])
+- "1 ticket" and "1 spot available" use singular wording in My Tickets and on
+  the GA floor. ([#8])
+
+### Removed
+
+- Unused `sqlite3` import from the Flask app module. ([#9])
 
 ## [Milestone 3] - 2026-11-01
 
@@ -91,3 +106,6 @@ is named after the milestone it shipped in.
 [#4]: https://github.com/Kandel-Bibas/TicketSenpai/pull/4
 [#5]: https://github.com/Kandel-Bibas/TicketSenpai/pull/5
 [#6]: https://github.com/Kandel-Bibas/TicketSenpai/pull/6
+[#8]: https://github.com/Kandel-Bibas/TicketSenpai/pull/8
+[#9]: https://github.com/Kandel-Bibas/TicketSenpai/pull/9
+[#10]: https://github.com/Kandel-Bibas/TicketSenpai/pull/10

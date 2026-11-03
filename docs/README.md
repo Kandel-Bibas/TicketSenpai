@@ -2,20 +2,33 @@
 
 Start with the [project README](../README.md) for an overview and quick start.
 
-## Guides
+## Using TicketSenpai
+
+| Document | Read it when you want to… |
+| --- | --- |
+| [User guide](user-guide.md) | Find shows, choose seats, hold them, and buy tickets |
+| [Administrator guide](admin-guide.md) | Create, edit, publish, and price events |
+| [Troubleshooting and FAQ](troubleshooting.md) | Fix an error or find a quick answer |
+| [Glossary](glossary.md) | Look up a term |
+
+## Developing TicketSenpai
 
 | Document | Read it when you want to… |
 | --- | --- |
 | [Architecture](architecture.md) | Understand the processes, request flow, data model, holds, checkout, and design decisions |
 | [HTTP API reference](api.md) | Call the API directly or change an endpoint |
-| [Development guide](development.md) | Set up, run, test, and change the code |
-| [Troubleshooting and FAQ](troubleshooting.md) | Fix an error or find a quick answer |
+| [Database reference](database.md) | Look up a table or column, or change the schema |
+| [Frontend guide](frontend.md) | Work on pages, components, or the API client |
+| [Configuration reference](configuration.md) | Find where a port, limit, or timing constant is defined |
+| [Development guide](development.md) | Set up, run, and change the code |
+| [Testing guide](testing.md) | Understand what is tested and write new tests |
 
 ## Security
 
 | Document | Contents |
 | --- | --- |
 | [Security policy](../SECURITY.md) | How to report a vulnerability, security model, known limitations |
+| [Threat model](threat-model.md) | Assets, actors, trust boundaries, STRIDE threats, and accepted risks |
 | [Remediation record](vulnerabilities.md) | The six Milestone 1 weaknesses (V01–V06), their fixes, and how to verify each |
 
 ## Project

@@ -58,6 +58,12 @@ curl --get --data-urlencode "q=') UNION SELECT id, email, password, role, '2027-
 Expected: both return `{"items": []}`. The payload is treated as a literal search
 string that matches no event, and the draft event does not appear.
 
+**Follow-up hardening.** A later change ([#10](https://github.com/Kandel-Bibas/TicketSenpai/pull/10))
+also escapes the LIKE wildcards `%` and `_` (with `ESCAPE '!'`), so a search for
+`%` no longer matches every published event. This was not an injection, since
+the value was already bound, but it made search behave as users expect.
+`test_search_wildcards_are_literal` covers it.
+
 ## V02 Stored XSS
 
 **Weakness.** Review bodies were stored unchanged and rendered with
