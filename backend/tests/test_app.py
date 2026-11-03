@@ -171,6 +171,12 @@ class TicketSenpaiTest(unittest.TestCase):
         found = self.client.get('/api/events', query_string={'q': 'After'}).get_json()['items']
         self.assertEqual([event['name'] for event in found], ['After Hours'])
 
+    def test_search_wildcards_are_literal(self):
+        for query in ['%', '_', '!']:
+            result = self.client.get('/api/events', query_string={'q': query})
+            self.assertEqual(result.status_code, 200)
+            self.assertEqual(result.get_json()['items'], [])
+
     def test_v02_review_html_is_returned_as_data(self):
         payload = '<img src=x onerror="document.body.dataset.xss=\'verified\'">'
         self.assertEqual(self.client.post('/api/events/1/reviews', json={'body': payload}).status_code, 201)
