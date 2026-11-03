@@ -1,7 +1,6 @@
 """TicketSenpai: localhost-only coursework application, remediated in Milestone 3."""
 import re
 import secrets
-import sqlite3
 import time
 from datetime import datetime
 from pathlib import Path
