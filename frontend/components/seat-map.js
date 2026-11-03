@@ -31,6 +31,7 @@ export default function SeatMap({
     }
   }
   const ga = seats.filter((s) => s.section === "GA");
+  const gaAvailable = ga.filter((s) => s.status === "available").length;
   return (
     <div className="venue">
       <div className="stage">Stage / front of house</div>
@@ -42,7 +43,7 @@ export default function SeatMap({
         <div className="ga-texture" aria-hidden="true" />
         <div className="ga-controls">
           <span>
-            {ga.filter((s) => s.status === "available").length} spots available
+            {gaAvailable} {gaAvailable === 1 ? "spot" : "spots"} available
           </span>
           <label>
             Quantity
