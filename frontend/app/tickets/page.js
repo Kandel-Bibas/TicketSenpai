@@ -59,7 +59,7 @@ export default function Tickets() {
               <p>{order.venue}</p>
               <span>
                 {order.status === "confirmed"
-                  ? `${order.tickets.length} tickets · Confirmed`
+                  ? `${order.tickets.length} ${order.tickets.length === 1 ? "ticket" : "tickets"} · Confirmed`
                   : "Payment declined"}
               </span>
             </div>
