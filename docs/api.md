@@ -143,7 +143,7 @@ substring), ordered by start time.
 
 | Query | Rules |
 | --- | --- |
-| `q` | Optional, up to 300 characters. Treated as literal text. |
+| `q` | Optional, up to 300 characters. Treated as literal text: SQL wildcards `%` and `_` match only themselves. |
 | `page` | Optional, 1–10000 |
 
 Returns `{ "items": [Event, ...] }`. Errors: `invalid_search`, `invalid_page`.
@@ -151,6 +151,11 @@ Returns `{ "items": [Event, ...] }`. Errors: `invalid_search`, `invalid_page`.
 ```sh
 curl -s 'http://127.0.0.1:3000/api/events?q=jazz'
 ```
+
+The search text is bound as a parameter, and `%`, `_`, and the escape
+character `!` are escaped before matching. Searching for `%` or `_` therefore
+returns only events whose name or artist actually contains that character, not
+every event.
 
 ### `GET /api/events/{id}`
 
