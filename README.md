@@ -157,8 +157,10 @@ events. Every seeded show is fictional; payment is simulated and never uses a ca
 4. Choose an approved or declined payment and check out.
 5. Find your tickets under **My tickets**.
 
+The [user guide](docs/user-guide.md) covers every step in detail.
+
 Sign in as the administrator to create, edit, publish, and unpublish events
-under **Manage events**.
+under **Manage events**. See the [administrator guide](docs/admin-guide.md).
 
 Prefer the command line? The [API reference](docs/api.md#end-to-end-example)
 walks through the same purchase with `curl`.
@@ -290,11 +292,19 @@ all known limitations.
 | Guide | Description |
 | --- | --- |
 | [Documentation index](docs/README.md) | Every document in one place |
+| [User guide](docs/user-guide.md) | Finding shows, holding seats, and buying tickets |
+| [Administrator guide](docs/admin-guide.md) | Managing, publishing, and pricing events |
 | [Architecture](docs/architecture.md) | Processes, request flow, data model, holds, checkout |
 | [HTTP API reference](docs/api.md) | Endpoints, payloads, and error codes |
-| [Development guide](docs/development.md) | Setup, running, testing, and conventions |
+| [Database reference](docs/database.md) | Tables, columns, indexes, and seed data |
+| [Frontend guide](docs/frontend.md) | Routes, components, and the API client |
+| [Configuration reference](docs/configuration.md) | Every port, limit, and timing constant |
+| [Development guide](docs/development.md) | Setup, running, and conventions |
+| [Testing guide](docs/testing.md) | What each test proves and how to write new ones |
 | [Troubleshooting and FAQ](docs/troubleshooting.md) | Common errors and fixes |
+| [Threat model](docs/threat-model.md) | STRIDE analysis and accepted risks |
 | [Remediation record](docs/vulnerabilities.md) | V01–V06 fixes and how to verify them |
+| [Glossary](docs/glossary.md) | Project terms |
 | [Changelog](CHANGELOG.md) | Changes by milestone |
 
 ## Submission package

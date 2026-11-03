@@ -16,6 +16,10 @@ is named after the milestone it shipped in.
   [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md),
   [SECURITY.md](SECURITY.md), [SUPPORT.md](SUPPORT.md), and GitHub issue and
   pull request templates.
+- Further guides: [user guide](docs/user-guide.md), [administrator guide](docs/admin-guide.md),
+  [database reference](docs/database.md), [frontend guide](docs/frontend.md),
+  [testing guide](docs/testing.md), [configuration reference](docs/configuration.md),
+  [glossary](docs/glossary.md), and [threat model](docs/threat-model.md).
 
 ### Fixed
 

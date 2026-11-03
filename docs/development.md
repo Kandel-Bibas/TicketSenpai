@@ -2,7 +2,9 @@
 
 Everything you need to work on TicketSenpai day to day: setting up, running,
 testing, and finding your way around the code. For a first run, the
-[Quick start](../README.md#quick-start) in the README is shorter.
+[Quick start](../README.md#quick-start) in the README is shorter. Deeper
+references: [testing](testing.md), [frontend](frontend.md),
+[database](database.md), and [configuration](configuration.md).
 
 - [Prerequisites](#prerequisites)
 - [Setting up](#setting-up)

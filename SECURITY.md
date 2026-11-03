@@ -111,3 +111,6 @@ welcome if you find a way they lead to something worse.
 
 A second review of the authentication and session code is recommended before
 any use beyond local coursework.
+
+For a structured view of assets, trust boundaries, and every threat with its
+current control, see the [threat model](docs/threat-model.md).
