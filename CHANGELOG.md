@@ -17,6 +17,17 @@ is named after the milestone it shipped in.
   [SECURITY.md](SECURITY.md), [SUPPORT.md](SUPPORT.md), and GitHub issue and
   pull request templates.
 
+### Fixed
+
+- Event search treats `%` and `_` as literal characters instead of LIKE
+  wildcards, so searching for `%` no longer returns every event. ([#10])
+- "1 ticket" and "1 spot available" use singular wording in My Tickets and on
+  the GA floor. ([#8])
+
+### Removed
+
+- Unused `sqlite3` import from the Flask app module. ([#9])
+
 ## [Milestone 3] - 2026-11-01
 
 ### Added
@@ -91,3 +102,6 @@ is named after the milestone it shipped in.
 [#4]: https://github.com/Kandel-Bibas/TicketSenpai/pull/4
 [#5]: https://github.com/Kandel-Bibas/TicketSenpai/pull/5
 [#6]: https://github.com/Kandel-Bibas/TicketSenpai/pull/6
+[#8]: https://github.com/Kandel-Bibas/TicketSenpai/pull/8
+[#9]: https://github.com/Kandel-Bibas/TicketSenpai/pull/9
+[#10]: https://github.com/Kandel-Bibas/TicketSenpai/pull/10
